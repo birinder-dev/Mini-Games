@@ -31,7 +31,6 @@ public class InGameHudMixin {
         if(CardClientState.isActive()) ci.cancel();
     }
 
-    @Shadow @Final private MinecraftClient client;
 
     @Unique
     private static final ItemStack VIRTUAL_CARD_STACK = new ItemStack(MiniGames.TAVERN_CARD);
@@ -51,7 +50,6 @@ public class InGameHudMixin {
 
         if(CardClientState.isCardSlot(slotIndex)){
             context.drawItem(player, VIRTUAL_CARD_STACK, x, y, seed);
-            context.drawStackOverlay(this.client.textRenderer, VIRTUAL_CARD_STACK, x, y);
             ci.cancel();
         } else {
             // empty non card slots when its on
