@@ -52,6 +52,13 @@ public class CardClientState {
         return active && getCardIndexForSlot(slot, cardCount) != -1;
     }
 
+    public static void removeOneCard(){
+        setCardCount(cardCount - 1);
+        if(cardCount <= 0){
+            active = false;
+        }
+    }
+
     public static void playSelectedCard(int selectedSlot){
         int cardIndex = getCardIndexForSlot(selectedSlot, cardCount);
 

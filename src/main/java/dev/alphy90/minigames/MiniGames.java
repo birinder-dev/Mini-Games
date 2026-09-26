@@ -1,14 +1,26 @@
 package dev.alphy90.minigames;
 
 import dev.alphy90.minigames.block.GamblingStoolBlock;
+import dev.alphy90.minigames.block.CardBlock;
+import dev.alphy90.minigames.network.PlaceCardPayload;
 import dev.alphy90.minigames.entity.GamblerEntity;
 import dev.alphy90.minigames.entity.SeatEntity;
+
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
+import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.network.RegistryByteBuf;
+import net.minecraft.sound.BlockSoundGroup;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvents;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.SpawnGroup;
 import net.minecraft.item.BlockItem;
@@ -19,6 +31,8 @@ import net.minecraft.registry.Registry;
 import net.minecraft.item.ItemGroups;
 import net.minecraft.item.SpawnEggItem;
 
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,6 +41,13 @@ public class MiniGames implements ModInitializer {
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 	public static final Block GAMBLING_STOOL = new GamblingStoolBlock(AbstractBlock.Settings.create().nonOpaque().strength(1.5F));
 	public static final Item GAMBLING_STOOL_ITEM = new BlockItem(GAMBLING_STOOL, new Item.Settings());
+	public static final Block PLACED_CARD = new CardBlock(
+			AbstractBlock.Settings.create()
+					.breakInstantly()
+					.noCollision()
+					.nonOpaque()
+					.sounds(BlockSoundGroup.WOOL)
+	);
 
 
 	public static final EntityType<GamblerEntity> GAMBLER = Registry.register(
@@ -60,6 +81,7 @@ public class MiniGames implements ModInitializer {
 		Registry.register(Registries.BLOCK, id("gambling_stool"), GAMBLING_STOOL);
 		Registry.register(Registries.ITEM, id("gambling_stool"), GAMBLING_STOOL_ITEM);
 		Registry.register(Registries.ITEM, id("gambler_spawn_Egg"), GAMBLER_SPAWN_EGG);
+		Registry.register(Registries.BLOCK, id("placed_card"), PLACED_CARD);
 
 		FabricDefaultAttributeRegistry.register(GAMBLER, GamblerEntity.createGamblerAttributes());
 
@@ -74,6 +96,25 @@ public class MiniGames implements ModInitializer {
 		ItemGroupEvents.modifyEntriesEvent(ItemGroups.TOOLS).register(entries -> {
 			entries.add(TAVERN_CARD);
 		});
+
+		//placement networking
+		PayloadTypeRegistry.playC2S().register(PlaceCardPayload.ID, PlaceCardPayload.CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(PlaceCardPayload.ID, ((payload, context) -> {
+			context.server().execute(() -> {
+				ServerPlayerEntity player = context.player();
+				ServerWorld world = player.getServerWorld();
+				BlockPos targetPos = payload.pos().offset(payload.side());
+				Direction facing = payload.side();
+
+				if(world.getBlockState(targetPos).isAir()){
+					BlockState state = PLACED_CARD.getDefaultState().with(CardBlock.FACING, facing);
+					if(state.canPlaceAt(world, targetPos)){
+						world.setBlockState(targetPos, state);
+						world.playSound(null, targetPos, SoundEvents.BLOCK_WOOL_PLACE, SoundCategory.BLOCKS, 0.8F, 1.3F);
+					}
+				}
+			});
+		}));
 	}
 
 	public static Identifier id(String path) {

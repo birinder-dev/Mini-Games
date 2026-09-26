@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "facing=up": {"model": "minigames:block/placed_card"},
+    "facing=down": {"model": "minigames:block/placed_card", "x": 180},
+    "facing=north": {"model": "minigames:block/placed_card", "x": 90},
+    "facing=south": {"model": "minigames:block/placed_card", "x": 90, "y": 180},
+    "facing=west": {"model": "minigames:block/placed_card", "x": 90, "y": 270},
+    "facing=east": {"model": "minigames:block/placed_card", "x": 90, "y": 90}
+  }
+}
