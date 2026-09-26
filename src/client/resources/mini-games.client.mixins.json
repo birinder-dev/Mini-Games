@@ -1,0 +1,13 @@
+{
+	"required": true,
+	"package": "dev.alphy90.minigames.client.mixin",
+	"compatibilityLevel": "JAVA_21",
+	"client": ["InGameHudMixin", "HeldItemRendererMixin", "MinecraftClientMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	},
+	"overwrites": {
+		"requireAnnotations": true
+	}
+}

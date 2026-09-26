@@ -1,0 +1,6 @@
+{
+  "item.minigames.tavern_card": "Tavern Card",
+  "block.minigames.gambling_stool": "Gambling Stool",
+  "entity.minigames.gambler" : "Gambler",
+  "item.minigames.gambler_spawn_egg": "Gambler Spawn Egg"
+}
