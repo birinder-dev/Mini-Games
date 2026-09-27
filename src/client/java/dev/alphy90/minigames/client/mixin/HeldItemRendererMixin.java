@@ -32,7 +32,7 @@ public abstract class HeldItemRendererMixin {
 
     @Inject(method = "renderItem(FLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider$Immediate;Lnet/minecraft/client/network/ClientPlayerEntity;I)V", at = @At("HEAD"), cancellable = true)
     private void renderHandheldCards(float tickDelta, MatrixStack matrices, VertexConsumerProvider.Immediate vertexConsumers, ClientPlayerEntity player, int light, CallbackInfo ci) {
-        if (CardClientState.isActive()) {
+        if (CardClientState.isActive()  && !CardClientState.isThrowCharging()) {
             render3DCardHand(matrices, vertexConsumers, light, tickDelta, player);
             ci.cancel();
         }

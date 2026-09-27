@@ -3,5 +3,6 @@
   "block.minigames.gambling_stool": "Gambling Stool",
   "entity.minigames.gambler" : "Gambler",
   "item.minigames.gambler_spawn_egg": "Gambler Spawn Egg",
-  "block.minigames.placed_card": "Placed Card"
+  "block.minigames.placed_card": "Placed Card",
+  "entity.minigames.card_projectile": "Card"
 }

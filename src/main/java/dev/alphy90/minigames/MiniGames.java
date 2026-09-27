@@ -5,6 +5,9 @@ import dev.alphy90.minigames.block.CardBlock;
 import dev.alphy90.minigames.network.PlaceCardPayload;
 import dev.alphy90.minigames.entity.GamblerEntity;
 import dev.alphy90.minigames.entity.SeatEntity;
+import dev.alphy90.minigames.entity.CardProjectileEntity;
+import dev.alphy90.minigames.network.ThrowCardPayLoad;
+import dev.alphy90.minigames.network.PlaceCardPayload;
 
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
@@ -49,6 +52,16 @@ public class MiniGames implements ModInitializer {
 					.sounds(BlockSoundGroup.WOOL)
 	);
 
+
+	public static final EntityType<CardProjectileEntity> CARD_PROJECTILE = Registry.register(
+			Registries.ENTITY_TYPE,
+			id("card_projectile"),
+			EntityType.Builder.<CardProjectileEntity>create(CardProjectileEntity::new, SpawnGroup.MISC)
+					.dimensions(0.4F, 0.4F)
+					.maxTrackingRange(4)
+					.trackingTickInterval(20)
+					.build()
+	);
 
 	public static final EntityType<GamblerEntity> GAMBLER = Registry.register(
 			Registries.ENTITY_TYPE,
@@ -97,7 +110,7 @@ public class MiniGames implements ModInitializer {
 			entries.add(TAVERN_CARD);
 		});
 
-		//placement networking
+		// flat placement networking
 		PayloadTypeRegistry.playC2S().register(PlaceCardPayload.ID, PlaceCardPayload.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(PlaceCardPayload.ID, ((payload, context) -> {
 			context.server().execute(() -> {
@@ -113,6 +126,22 @@ public class MiniGames implements ModInitializer {
 						world.playSound(null, targetPos, SoundEvents.BLOCK_WOOL_PLACE, SoundCategory.BLOCKS, 0.8F, 1.3F);
 					}
 				}
+			});
+		}));
+
+		// projectile throw networking
+		PayloadTypeRegistry.playC2S().register(ThrowCardPayLoad.ID, ThrowCardPayLoad.CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(ThrowCardPayLoad.ID, ((payload, context) -> {
+			context.server().execute(() -> {
+				ServerPlayerEntity player = context.player();
+				ServerWorld world = player.getServerWorld();
+
+				CardProjectileEntity projectile = new CardProjectileEntity(world, player, payload.power());
+				world.spawnEntity(projectile);
+
+				world.playSound(null, player.getX(), player.getY(), player.getZ(),
+						SoundEvents.ENTITY_SNOWBALL_THROW, SoundCategory.PLAYERS,
+						0.6F, 1.2F + (payload.power() * 0.4F));
 			});
 		}));
 	}
