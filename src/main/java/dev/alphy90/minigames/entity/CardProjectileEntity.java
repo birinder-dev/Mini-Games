@@ -4,7 +4,7 @@ import dev.alphy90.minigames.MiniGames;
 
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.projectile.PersistentProjectileEntity;
+import net.minecraft.entity.projectile.ArrowEntity;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.sound.SoundEvent;
@@ -12,7 +12,7 @@ import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.world.World;
 
-public class CardProjectileEntity extends PersistentProjectileEntity {
+public class CardProjectileEntity extends ArrowEntity {
 
     public CardProjectileEntity(EntityType<? extends CardProjectileEntity> type, World world){
         super(type, world);
@@ -20,7 +20,9 @@ public class CardProjectileEntity extends PersistentProjectileEntity {
     }
 
     public CardProjectileEntity(World world, LivingEntity owner, float power){
-        super(MiniGames.CARD_PROJECTILE, owner, world, new ItemStack(MiniGames.TAVERN_CARD), null);
+        super(MiniGames.CARD_PROJECTILE, world);
+        this.setOwner(owner);
+        this.setPosition(owner.getX(), owner.getY() - 0.1, owner.getZ());
         this.pickupType = PickupPermission.ALLOWED;
 
         //charge .7 -> 2.5
@@ -29,7 +31,7 @@ public class CardProjectileEntity extends PersistentProjectileEntity {
     }
 
     @Override
-    protected ItemStack getDefaultstack(){
+    public ItemStack asItemStack(){
         return new ItemStack(MiniGames.TAVERN_CARD);
     }
 
