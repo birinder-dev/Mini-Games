@@ -20,9 +20,10 @@ public class CardClientState {
     }
 
     public static void setCardCount(int count){
-        cardCount = Math.max(1, Math.min(9, count));
+        cardCount = Math.max(0, Math.min(9, count));
         if(cardCount == 0){
             active = false;
+            resetHold();
         }
     }
 

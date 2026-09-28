@@ -32,7 +32,7 @@ public abstract class HeldItemRendererMixin {
 
     @Inject(method = "renderItem(FLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider$Immediate;Lnet/minecraft/client/network/ClientPlayerEntity;I)V", at = @At("HEAD"), cancellable = true)
     private void renderHandheldCards(float tickDelta, MatrixStack matrices, VertexConsumerProvider.Immediate vertexConsumers, ClientPlayerEntity player, int light, CallbackInfo ci) {
-        if (CardClientState.isActive()  && !CardClientState.isThrowCharging()) {
+        if (CardClientState.isActive()) {
             render3DCardHand(matrices, vertexConsumers, light, tickDelta, player);
             ci.cancel();
         }
@@ -63,8 +63,8 @@ public abstract class HeldItemRendererMixin {
         matrices.translate(0.0F, -0.32F + pitchFactor * -0.05F, -0.40F);
         matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(-20.0F)); // <-- Changed to negative to bring bottom toward you!
 
-        float cardW = 0.28F;
-        float cardH = 0.30F;
+        float cardW = 0.33F;
+        float cardH = 0.35F;
 
         float anglestep;
         float cardSpacing;

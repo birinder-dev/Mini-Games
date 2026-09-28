@@ -52,10 +52,13 @@ public class CardBlock extends Block{
 
     @Override
     public boolean canPlaceAt(BlockState state, WorldView world, BlockPos pos){
-     Direction facing = state.get(FACING);
-     BlockPos supportPos = pos.offset(facing.getOpposite());
-     BlockState supportState = world.getBlockState(supportPos);
-     return !supportState.isAir() && !supportState.getCollisionShape(world, supportPos).isEmpty();
+        Direction facing = state.get(FACING);
+        BlockPos supportPos = pos.offset(facing.getOpposite());
+        BlockState supportState = world.getBlockState(supportPos);
+        if (supportState.isOf(MiniGames.PLACED_CARD)) {
+            return false;
+        }
+        return !supportState.isAir() && !supportState.getCollisionShape(world, supportPos).isEmpty();
     }
 
     //breaking like a flower

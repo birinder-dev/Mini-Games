@@ -42,47 +42,42 @@ import org.slf4j.LoggerFactory;
 public class MiniGames implements ModInitializer {
 	public static final String MOD_ID = "minigames";
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
-	public static final Block GAMBLING_STOOL = new GamblingStoolBlock(AbstractBlock.Settings.create().nonOpaque().strength(1.5F));
+	public static final Block GAMBLING_STOOL = new GamblingStoolBlock(
+			AbstractBlock.Settings.create().nonOpaque().strength(1.5F));
 	public static final Item GAMBLING_STOOL_ITEM = new BlockItem(GAMBLING_STOOL, new Item.Settings());
 	public static final Block PLACED_CARD = new CardBlock(
 			AbstractBlock.Settings.create()
 					.breakInstantly()
 					.noCollision()
 					.nonOpaque()
-					.sounds(BlockSoundGroup.WOOL)
-	);
-
+					.sounds(BlockSoundGroup.WOOL));
 
 	public static final EntityType<CardProjectileEntity> CARD_PROJECTILE = Registry.register(
 			Registries.ENTITY_TYPE,
 			id("card_projectile"),
 			EntityType.Builder.<CardProjectileEntity>create(CardProjectileEntity::new, SpawnGroup.MISC)
-					.dimensions(0.4F, 0.4F)
+					.dimensions(0.6F, 0.6F)
 					.maxTrackingRange(4)
 					.trackingTickInterval(20)
-					.build()
-	);
+					.build());
 
 	public static final EntityType<GamblerEntity> GAMBLER = Registry.register(
 			Registries.ENTITY_TYPE,
 			id("gambler"),
-			EntityType.Builder.create(GamblerEntity::new, SpawnGroup.CREATURE).dimensions(0.6F, 1.95F).build()
-	);
+			EntityType.Builder.create(GamblerEntity::new, SpawnGroup.CREATURE).dimensions(0.6F, 1.95F).build());
 
 	public static final EntityType<SeatEntity> SEAT_ENTITY = Registry.register(
 			Registries.ENTITY_TYPE,
 			id("seat"),
-			EntityType.Builder.<SeatEntity>create(SeatEntity::new, SpawnGroup.MISC).dimensions(0.0F, 0.0F).build()
-	);
+			EntityType.Builder.<SeatEntity>create(SeatEntity::new, SpawnGroup.MISC).dimensions(0.0F, 0.0F).build());
 
 	public static final Item TAVERN_CARD = new Item(new Item.Settings().maxCount(64));
 
 	public static final Item GAMBLER_SPAWN_EGG = new SpawnEggItem(
 			GAMBLER,
-			0x563c24, //base:coat brown
-			0xecb22e,  //speckle: gold
-			new Item.Settings()
-	);
+			0x563c24, // base:coat brown
+			0xecb22e, // speckle: gold
+			new Item.Settings());
 
 	@Override
 	public void onInitialize() {
@@ -93,7 +88,7 @@ public class MiniGames implements ModInitializer {
 		Registry.register(Registries.ITEM, id("tavern_card"), TAVERN_CARD);
 		Registry.register(Registries.BLOCK, id("gambling_stool"), GAMBLING_STOOL);
 		Registry.register(Registries.ITEM, id("gambling_stool"), GAMBLING_STOOL_ITEM);
-		Registry.register(Registries.ITEM, id("gambler_spawn_Egg"), GAMBLER_SPAWN_EGG);
+		Registry.register(Registries.ITEM, id("gambler_spawn_egg"), GAMBLER_SPAWN_EGG);
 		Registry.register(Registries.BLOCK, id("placed_card"), PLACED_CARD);
 
 		FabricDefaultAttributeRegistry.register(GAMBLER, GamblerEntity.createGamblerAttributes());
@@ -119,11 +114,12 @@ public class MiniGames implements ModInitializer {
 				BlockPos targetPos = payload.pos().offset(payload.side());
 				Direction facing = payload.side();
 
-				if(world.getBlockState(targetPos).isAir()){
+				if (world.getBlockState(targetPos).isAir()) {
 					BlockState state = PLACED_CARD.getDefaultState().with(CardBlock.FACING, facing);
-					if(state.canPlaceAt(world, targetPos)){
+					if (state.canPlaceAt(world, targetPos)) {
 						world.setBlockState(targetPos, state);
-						world.playSound(null, targetPos, SoundEvents.BLOCK_WOOL_PLACE, SoundCategory.BLOCKS, 0.8F, 1.3F);
+						world.playSound(null, targetPos, SoundEvents.BLOCK_WOOL_PLACE, SoundCategory.BLOCKS, 0.8F,
+								1.3F);
 					}
 				}
 			});

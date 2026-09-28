@@ -4,6 +4,7 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 
 public class CardHandCommand {
     public static void register() {
@@ -13,7 +14,7 @@ public class CardHandCommand {
                     .then(ClientCommandManager.literal("off")
                             .executes(context -> {
                                 CardClientState.setActive(false);
-                                context.getSource().sendFeedback(Text.literal("§cCard hand disabled."));
+                                context.getSource().sendFeedback(Text.literal("Card hand disabled.").formatted(Formatting.RED));
                                 return 1;
                             })
                     )
@@ -23,8 +24,7 @@ public class CardHandCommand {
                                 int count = IntegerArgumentType.getInteger(context, "count");
                                 CardClientState.setActive(true);
                                 CardClientState.setCardCount(count);
-                                // Changed the color code from §c (red) to §a (green) for enabling!
-                                context.getSource().sendFeedback(Text.literal("§aCard hand enabled with " + count + " cards."));
+                                context.getSource().sendFeedback(Text.literal("Card hand enabled with " + count + " cards.").formatted(Formatting.GREEN));
                                 return 1;
                             })
                     )

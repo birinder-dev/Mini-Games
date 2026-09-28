@@ -12,7 +12,7 @@
 		"sources": "https://github.com/FabricMC/fabric-example-mod"
 	},
 	"license": "CC0-1.0",
-	"icon": "assets/mini-games/icon.png",
+	"icon": "assets/minigames/icon.png",
 	"environment": "*",
 	"entrypoints": {
 		"main": [
@@ -25,7 +25,7 @@
 	"mixins": [
       "minigames.mixins.json",
 		{
-			"config": "mini-games.client.mixins.json",
+			"config": "minigames.client.mixins.json",
 			"environment": "client"
 		}
 	],

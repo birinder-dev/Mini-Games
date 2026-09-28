@@ -1,7 +1,6 @@
 package dev.alphy90.minigames.entity.ai;
 
 import dev.alphy90.minigames.entity.GamblerEntity;
-import dev.alphy90.minigames.entity.GamblerEntity;
 import dev.alphy90.minigames.entity.SeatEntity;
 import dev.alphy90.minigames.block.GamblingStoolBlock;
 
