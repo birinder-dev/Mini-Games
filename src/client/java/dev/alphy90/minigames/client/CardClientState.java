@@ -75,6 +75,11 @@ public class CardClientState {
         return throwCharging;
     }
 
+    public static float getChargeProgress(){
+        if(holdTicks < 20) return 0.0F;
+        return Math.min(1.0F, (holdTicks - 20) / 40.0F);
+    }
+
     public static float getThrowPower(){
         if(holdTicks < 20) return 0.0F;
 
@@ -86,6 +91,46 @@ public class CardClientState {
     public static void resetHold(){
         holdTicks = 0;
         throwCharging = false;
+    }
+
+    public static final int TOTAL_FLICK_TICKS = 4;
+    private static int flickTicks = 0;
+    private static float pendingPower = 0.0F;
+    private static boolean pendingThrow = false;
+
+    public static void startFlick(float power){
+        flickTicks = TOTAL_FLICK_TICKS;
+        pendingPower = power;
+        pendingThrow = true;
+        resetHold();
+    }
+
+    public static boolean isFlicking(){
+        return flickTicks > 0;
+    }
+
+    public static int getFlickTicks(){
+        return flickTicks;
+    }
+
+    public static float getPendingPower(){
+        return pendingPower;
+    }
+
+    public static boolean hasPendingThrow(){
+        return pendingThrow;
+    }
+
+    public static void tickFlick(){
+        if(flickTicks > 0){
+            flickTicks--;
+        }
+    }
+
+    public static void completeThrow(){
+        pendingThrow = false;
+        pendingPower = 0.0F;
+        flickTicks = 0;
     }
 
     // centred hotbar slots

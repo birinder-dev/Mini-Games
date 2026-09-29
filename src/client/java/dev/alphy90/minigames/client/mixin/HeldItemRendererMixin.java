@@ -105,14 +105,47 @@ public abstract class HeldItemRendererMixin {
 
             int selectedCardIndex = CardClientState.getCardIndexForSlot(selectedSlot, count);
             boolean isSelected = (i == selectedCardIndex);
-            if (isSelected) {
-                cardPivotY += 0.045F;
-                arcZ = (count * 0.012F) + 0.030F; // Pops well in front of all stacked cards
-            }
 
+            if(isSelected){
+                cardPivotY += 0.045F;
+                arcZ = (count * 0.012F) + 0.030F;
+
+                if(CardClientState.isThrowCharging()){
+                    float charge = CardClientState.getChargeProgress();
+                    cardPivotY -= 0.06F * charge;
+                    arcZ -= 0.16F * charge;
+
+                    float shake = (float)Math.sin((player.age + tickDelta) * 2.5F) * (0.0012F + 0.0022F * charge);
+                    cardX += shake;
+                    cardPivotY += shake * 0.5F;
+                }
+
+                if(CardClientState.isFlicking()){
+                    float flickProgress = 1.0F - ((float) CardClientState.getFlickTicks() / (float) CardClientState.TOTAL_FLICK_TICKS);
+                    cardPivotY += 0.08F * flickProgress;
+                    arcZ += 0.35F * flickProgress;
+                }
+            }
             matrices.push();
             matrices.translate(cardX, cardPivotY, arcZ);
+
             matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(angleZ));
+
+            if(isSelected){
+                if(CardClientState.isThrowCharging()){
+                    float charge = CardClientState.getChargeProgress();
+                    matrices.translate(0.0F, -cardH * 0.45F * charge, 0.0F);
+
+                    matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(-28.0F * charge));
+                    matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(10.0F * charge));
+                } else if (CardClientState.isFlicking()) {
+                    float flickProgress = 1.0F - ((float) CardClientState.getFlickTicks() / (float)CardClientState.TOTAL_FLICK_TICKS);
+
+                    matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(42.0F * flickProgress));
+                    matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(25.0F * flickProgress));
+                }
+            }
+
             renderCardQuad(matrices, vertexConsumers, cardLight, cardW, cardH, isSelected);
             matrices.pop();
         }

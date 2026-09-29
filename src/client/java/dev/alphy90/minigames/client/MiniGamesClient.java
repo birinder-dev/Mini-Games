@@ -15,6 +15,7 @@ import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 
 import net.minecraft.client.render.RenderLayer;
+import net.minecraft.client.session.telemetry.ThreadedLogWriter;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
@@ -59,11 +60,24 @@ public class MiniGamesClient implements ClientModInitializer {
 				actionCooldown--;
 			}
 
+			if (CardClientState.isFlicking()){
+				CardClientState.tickFlick();
+
+				if(CardClientState.getFlickTicks() == 0 && CardClientState.hasPendingThrow()){
+					float power = CardClientState.getPendingPower();
+					ClientPlayNetworking.send(new ThrowCardPayLoad(power));
+					CardClientState.removeOneCard();
+					client.player.swingHand(Hand.MAIN_HAND);
+					CardClientState.completeThrow();
+					actionCooldown = 5;
+				}
+			}
+
 			if(CardClientState.isActive() && CardClientState.getCardCount() > 0){
 				int selectedSlot = client.player.getInventory().selectedSlot;
 				boolean cardSelected = CardClientState.isCardSlot(selectedSlot);
 
-				if(client.options.useKey.isPressed() && cardSelected){
+				if(client.options.useKey.isPressed() && cardSelected && !CardClientState.isFlicking()){
 					CardClientState.incrementHold();
 				} else {
 					int held = CardClientState.getHoldTicks();
@@ -92,10 +106,8 @@ public class MiniGamesClient implements ClientModInitializer {
 						} else if (CardClientState.isThrowCharging() && cardSelected) {
 							// holding >1sec
 							float power = CardClientState.getThrowPower();
-							ClientPlayNetworking.send(new ThrowCardPayLoad(power));
-							CardClientState.removeOneCard();
-							client.player.swingHand(Hand.MAIN_HAND);
-							actionCooldown = 5;
+
+							CardClientState.startFlick(power);
 						}
 					}
 					CardClientState.resetHold();
