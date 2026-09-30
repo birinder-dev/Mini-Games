@@ -3,7 +3,7 @@
 	"package": "dev.alphy90.minigames.mixin",
 	"compatibilityLevel": "JAVA_21",
 	"mixins": [
-
+		"ItemStackMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

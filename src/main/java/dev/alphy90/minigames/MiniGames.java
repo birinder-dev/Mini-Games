@@ -8,11 +8,14 @@ import dev.alphy90.minigames.entity.SeatEntity;
 import dev.alphy90.minigames.entity.CardProjectileEntity;
 import dev.alphy90.minigames.network.ThrowCardPayLoad;
 import dev.alphy90.minigames.network.PlaceCardPayload;
+import dev.alphy90.minigames.config.ModConfig;
+import dev.alphy90.minigames.command.MiniGamesConfigCommand;
 
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 import net.minecraft.block.AbstractBlock;
@@ -71,7 +74,7 @@ public class MiniGames implements ModInitializer {
 			id("seat"),
 			EntityType.Builder.<SeatEntity>create(SeatEntity::new, SpawnGroup.MISC).dimensions(0.0F, 0.0F).build());
 
-	public static final Item TAVERN_CARD = new Item(new Item.Settings().maxCount(64));
+	public static final Item TAVERN_CARD = new Item(new Item.Settings().maxCount(9));
 
 	public static final Item GAMBLER_SPAWN_EGG = new SpawnEggItem(
 			GAMBLER,
@@ -104,6 +107,12 @@ public class MiniGames implements ModInitializer {
 		ItemGroupEvents.modifyEntriesEvent(ItemGroups.TOOLS).register(entries -> {
 			entries.add(TAVERN_CARD);
 		});
+
+		ModConfig.load();
+
+		CommandRegistrationCallback.EVENT.register(((dispatcher, registryAccess, environment) -> {
+			MiniGamesConfigCommand.register(dispatcher);
+		}));
 
 		// flat placement networking
 		PayloadTypeRegistry.playC2S().register(PlaceCardPayload.ID, PlaceCardPayload.CODEC);

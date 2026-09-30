@@ -2,6 +2,7 @@ package dev.alphy90.minigames.entity;
 
 import com.google.common.net.HostAndPort;
 import dev.alphy90.minigames.MiniGames;
+import dev.alphy90.minigames.config.ModConfig;
 
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
@@ -55,8 +56,11 @@ public class CardProjectileEntity extends ArrowEntity {
         return SoundEvents.ENTITY_ZOMBIE_ATTACK_WOODEN_DOOR;
     }
 
-    @Override // for other entity, for now bounce off em without damage
+    @Override
     protected void onEntityHit(EntityHitResult entityHitResult){
+        if(ModConfig.get().cardDamage > 0.0F && entityHitResult.getEntity() instanceof LivingEntity target){
+            target.damage(this.getDamageSources().thrown(this, this.getOwner()), ModConfig.get().cardDamage);
+        }
         this.setVelocity(this.getVelocity().multiply(-0.2));
     }
 
@@ -72,7 +76,7 @@ public class CardProjectileEntity extends ArrowEntity {
 
     @Override
     public ActionResult interact(PlayerEntity player, Hand hand){
-        if(hand == Hand.MAIN_HAND && player.getStackInHand(hand).isEmpty() && this.inGround){
+        if(hand == Hand.MAIN_HAND && player.getStackInHand(hand).isEmpty() && this.inGround && ModConfig.get().allowCardPickup){
             if(!this.getWorld().isClient()){
                 player.getInventory().offerOrDrop(this.asItemStack());
                 this.getWorld().playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.ENTITY_ITEM_PICKUP, SoundCategory.PLAYERS, 0.8F, 1.2F);
@@ -83,13 +87,13 @@ public class CardProjectileEntity extends ArrowEntity {
         return super.interact(player, hand);
     }
 
-    public static final int DESPAWN_TICKS = 6000;
     private int despawnTimer = 0;
 
     @Override
     protected void age(){
         this.despawnTimer++;
-        if(this.despawnTimer >= DESPAWN_TICKS){
+        int maxSeconds = ModConfig.get().cardDespawnSeconds;
+        if(maxSeconds >= 0 && this.despawnTimer >= maxSeconds * 20){
             this.discard();
         }
     }

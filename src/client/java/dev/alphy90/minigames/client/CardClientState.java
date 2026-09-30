@@ -1,5 +1,7 @@
 package dev.alphy90.minigames.client;
 
+import dev.alphy90.minigames.config.ModConfig;
+
 public class CardClientState {
     private static boolean active = false;
     private static int cardCount = 1;
@@ -20,7 +22,8 @@ public class CardClientState {
     }
 
     public static void setCardCount(int count){
-        cardCount = Math.max(0, Math.min(9, count));
+        int max = ModConfig.get().maxCardsInHand;
+        cardCount = Math.max(0, Math.min(max, count));
         if(cardCount == 0){
             active = false;
             resetHold();
