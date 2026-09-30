@@ -8,15 +8,20 @@ import dev.alphy90.minigames.network.PlaceCardPayload;
 import dev.alphy90.minigames.network.ThrowCardPayLoad;
 
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.event.player.UseItemCallback;
+import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 
+import net.minecraft.item.ItemStack;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.session.telemetry.ThreadedLogWriter;
 import net.minecraft.util.Hand;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
@@ -35,6 +40,37 @@ public class MiniGamesClient implements ClientModInitializer {
 		BlockRenderLayerMap.INSTANCE.putBlock(MiniGames.PLACED_CARD, RenderLayer.getCutout());
 
 		CardHandCommand.register();
+
+		//shift+right click to enter state
+		UseItemCallback.EVENT.register((player, world, hand) -> {
+			if(hand == Hand.MAIN_HAND && player.isSneaking() && !CardClientState.isActive()){
+				ItemStack stack = player.getStackInHand(hand);
+				if(stack.isOf(MiniGames.TAVERN_CARD)){
+					if(world.isClient()){
+						int count = Math.min(9, Math.max(1, stack.getCount()));
+						CardClientState.setCardCount(count);
+						CardClientState.setActive(true);
+					}
+					return TypedActionResult.success(stack);
+				}
+			}
+			return TypedActionResult.pass(player.getStackInHand(hand));
+		});
+
+		UseBlockCallback.EVENT.register((player, world, hand, hitResult) -> {
+			if(hand == Hand.MAIN_HAND && player.isSneaking() && !CardClientState.isActive()){
+				ItemStack stack = player.getStackInHand(hand);
+				if(stack.isOf(MiniGames.TAVERN_CARD)){
+					if(world.isClient()){
+						int count = Math.min(9, Math.max(1, stack.getCount()));
+						CardClientState.setCardCount(count);
+						CardClientState.setActive(true);
+					}
+					return ActionResult.SUCCESS;
+				}
+			}
+			return ActionResult.PASS;
+		});
 
 		toggleCardsKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
 				"Toggle 3D Cards",
@@ -74,6 +110,12 @@ public class MiniGamesClient implements ClientModInitializer {
 			}
 
 			if(CardClientState.isActive() && CardClientState.getCardCount() > 0){
+				if(client.player.isSneaking() && client.options.useKey.isPressed() && actionCooldown == 0){
+					CardClientState.setActive(false);
+					CardClientState.resetHold();
+					actionCooldown = 5;
+					return;
+				}
 				int selectedSlot = client.player.getInventory().selectedSlot;
 				boolean cardSelected = CardClientState.isCardSlot(selectedSlot);
 
