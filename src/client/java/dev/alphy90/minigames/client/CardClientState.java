@@ -154,5 +154,15 @@ public class CardClientState {
     public static boolean isCardSlot(int slot){
         return active && getCardIndexForSlot(slot, cardCount) != -1;
     }
+
+    public static int originSlot = -1;
+
+    public static int getOriginSlot(){
+        return originSlot;
+    }
+
+    public static void setOriginSlot(int slot){
+        originSlot = slot;
+    }
 }
 

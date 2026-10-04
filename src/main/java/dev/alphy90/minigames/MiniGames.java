@@ -21,6 +21,7 @@ import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRe
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.item.*;
 import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.sound.SoundCategory;
@@ -29,13 +30,9 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.SpawnGroup;
-import net.minecraft.item.BlockItem;
 import net.minecraft.util.Identifier;
-import net.minecraft.item.Item;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
-import net.minecraft.item.ItemGroups;
-import net.minecraft.item.SpawnEggItem;
 
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -127,8 +124,8 @@ public class MiniGames implements ModInitializer {
 					BlockState state = PLACED_CARD.getDefaultState().with(CardBlock.FACING, facing);
 					if (state.canPlaceAt(world, targetPos)) {
 						world.setBlockState(targetPos, state);
-						world.playSound(null, targetPos, SoundEvents.BLOCK_WOOL_PLACE, SoundCategory.BLOCKS, 0.8F,
-								1.3F);
+						world.playSound(null, targetPos, SoundEvents.BLOCK_WOOL_PLACE, SoundCategory.BLOCKS, 0.8F, 1.3F);
+						consumeCard(player);
 					}
 				}
 			});
@@ -140,6 +137,7 @@ public class MiniGames implements ModInitializer {
 			context.server().execute(() -> {
 				ServerPlayerEntity player = context.player();
 				ServerWorld world = player.getServerWorld();
+				consumeCard(player);
 
 				CardProjectileEntity projectile = new CardProjectileEntity(world, player, payload.power());
 				world.spawnEntity(projectile);
@@ -147,11 +145,28 @@ public class MiniGames implements ModInitializer {
 				world.playSound(null, player.getX(), player.getY(), player.getZ(),
 						SoundEvents.ENTITY_SNOWBALL_THROW, SoundCategory.PLAYERS,
 						0.6F, 1.2F + (payload.power() * 0.4F));
+
 			});
 		}));
 	}
 
 	public static Identifier id(String path) {
 		return Identifier.of(MOD_ID, path);
+	}
+
+	private static void consumeCard(ServerPlayerEntity player){
+		if(player.isCreative()) return;
+		ItemStack mainHand = player.getMainHandStack();
+		if(mainHand.isOf(TAVERN_CARD)){
+			mainHand.decrement(1);
+			return;
+		}
+		for(int i = 0; i < player.getInventory().size(); i++){
+			ItemStack stack = player.getInventory().getStack(i);
+			if(stack.isOf(TAVERN_CARD)){
+				stack.decrement(1);
+				return;
+			}
+		}
 	}
 }

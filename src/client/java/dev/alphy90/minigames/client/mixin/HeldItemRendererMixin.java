@@ -46,25 +46,40 @@ public abstract class HeldItemRendererMixin {
         float pitch = player.getPitch(tickDelta);
         float pitchFactor = MathHelper.clamp(pitch / 90.0F, -1.0F, 1.0F);
 
-        if (!player.isInvisible()) {
-            matrices.push();
-            matrices.translate(0.0F, -0.32F + pitchFactor * -0.06F, -0.46F);
-            matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(64.0F));
-            matrices.translate(0.0F, -0.08F, 0.16F);
-            matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(90.0F));
-            matrices.scale(0.85F, 0.85F, 0.85F);
-            this.renderArm(matrices, vertexConsumers, light, Arm.RIGHT);
-            this.renderArm(matrices, vertexConsumers, light, Arm.LEFT);
-            matrices.pop();
+        boolean isThrowing = CardClientState.isThrowCharging() || CardClientState.isFlicking();
+        if(!player.isInvisible()){
+            if(isThrowing){
+                float charge = CardClientState.getChargeProgress();
+                matrices.push();
+                matrices.translate(0.04F, -0.24F + pitchFactor * -0.06F, -0.48F - (0.08F * charge));
+
+                matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(58.0F - (15.0F * charge)));
+                matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(78.0F));
+                matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(-10.0F));
+
+                matrices.scale(0.85F, 0.85F, 0.85F);
+                this.renderArm(matrices, vertexConsumers, light, Arm.RIGHT);
+                matrices.pop();
+            }else {
+                matrices.push();
+                matrices.translate(0.0F, -0.32F + pitchFactor * -0.06F, -0.46F);
+                matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(64.0F));
+                matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(90.0F));
+                matrices.scale(0.85F, 0.85F, 0.85F);
+                this.renderArm(matrices, vertexConsumers, light,  Arm.RIGHT);
+                this.renderArm(matrices, vertexConsumers, light, Arm.LEFT);
+                matrices.pop();
+            }
         }
 
         matrices.push();
         // Base position: negative X rotation pulls the LOWER edge toward your chest
-        matrices.translate(0.0F, -0.32F + pitchFactor * -0.05F, -0.40F);
+        matrices.translate(0.0F, -0.36F + pitchFactor * -0.05F, -0.42F);
         matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(-20.0F)); // <-- Changed to negative to bring bottom toward you!
 
         float cardW = 0.33F;
         float cardH = 0.35F;
+        float halfW = cardW / 2.0F;
 
         float anglestep;
         float cardSpacing;
@@ -89,31 +104,34 @@ public abstract class HeldItemRendererMixin {
         int cardLight = (skyLight << 16) | blockLight;
 
         for (int i = 0; i < count; i++) {
-            // t = 0 for the center card; negative for left, positive for right
-            float t = (float) (i - (count - 1) / 2.0F);
-
-            float cardX = t * cardSpacing;
-
-            float angleZ = -t * anglestep;
-
-            // Parabolic curve: center card stays highest, outer wings dip slightly
-            float arcY = -(t * t) * 0.005F;
-
-            // POSITIVE: gives dominance to the right card (higher i sits in front)
-            float arcZ = i * 0.012F;
-            float cardPivotY = arcY;
 
             int selectedCardIndex = CardClientState.getCardIndexForSlot(selectedSlot, count);
             boolean isSelected = (i == selectedCardIndex);
 
-            if(isSelected){
-                cardPivotY += 0.045F;
-                arcZ = (count * 0.012F) + 0.030F;
+            if(isThrowing && !isSelected){
+                continue;
+            }
+
+            // t = 0 for the center card; negative for left, positive for right
+            float t = (float) (i - (count - 1) / 2.0F);
+            float cardX = t * cardSpacing;
+            float angleZ = -t * anglestep;
+            // Parabolic curve: center card stays highest, outer wings dip slightly
+            float arcY = -(t * t) * 0.005F;
+            // POSITIVE: gives dominance to the right card (higher i sits in front)
+            float arcZ = i * 0.012F;
+            float cardPivotY = arcY;
+
+            if(isSelected && isThrowing){
+
+                cardX = 0.12F;
+                cardPivotY = 0.01F;
+                arcZ = -0.04F;
 
                 if(CardClientState.isThrowCharging()){
                     float charge = CardClientState.getChargeProgress();
-                    cardPivotY -= 0.06F * charge;
-                    arcZ -= 0.16F * charge;
+                    cardPivotY -= 0.04F * charge;
+                    arcZ -= 0.08F * charge;
 
                     float shake = (float)Math.sin((player.age + tickDelta) * 2.5F) * (0.0012F + 0.0022F * charge);
                     cardX += shake;
@@ -122,28 +140,35 @@ public abstract class HeldItemRendererMixin {
 
                 if(CardClientState.isFlicking()){
                     float flickProgress = 1.0F - ((float) CardClientState.getFlickTicks() / (float) CardClientState.TOTAL_FLICK_TICKS);
+                    cardX -= 0.10F * flickProgress;
                     cardPivotY += 0.08F * flickProgress;
                     arcZ += 0.35F * flickProgress;
                 }
+            } else if (isSelected) {
+                cardPivotY += 0.045F;
+                arcZ = (count * 0.012F) + 0.030F;
+                
             }
             matrices.push();
             matrices.translate(cardX, cardPivotY, arcZ);
 
-            matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(angleZ));
-
-            if(isSelected){
+            if(isSelected && isThrowing){
                 if(CardClientState.isThrowCharging()){
                     float charge = CardClientState.getChargeProgress();
-                    matrices.translate(0.0F, -cardH * 0.45F * charge, 0.0F);
+                    matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(-15.0F));
+                    matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(-25.0F * charge));
+                    matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(45.0F));
 
-                    matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(-28.0F * charge));
-                    matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(10.0F * charge));
+                    matrices.translate(-halfW * 0.85F, -0.06F, 0.0F);
                 } else if (CardClientState.isFlicking()) {
                     float flickProgress = 1.0F - ((float) CardClientState.getFlickTicks() / (float)CardClientState.TOTAL_FLICK_TICKS);
 
                     matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(42.0F * flickProgress));
-                    matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(25.0F * flickProgress));
+                    matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(-25.0F * flickProgress));
+                    matrices.translate(-halfW * 0.85F, -0.06F, 0.0F);
                 }
+            } else {
+                matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(angleZ));
             }
 
             renderCardQuad(matrices, vertexConsumers, cardLight, cardW, cardH, isSelected);

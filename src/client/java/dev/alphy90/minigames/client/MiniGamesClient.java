@@ -33,6 +33,7 @@ public class MiniGamesClient implements ClientModInitializer {
 
 	private static KeyBinding toggleCardsKey;
 	private static int actionCooldown = 0;
+	private static boolean shiftRightClickHandled = false;
 
 	@Override
 	public void onInitializeClient() {
@@ -41,15 +42,28 @@ public class MiniGamesClient implements ClientModInitializer {
 
 		CardHandCommand.register();
 
-		//shift+right click to enter state
+		// Shift + Right Click to enter or exit card state
 		UseItemCallback.EVENT.register((player, world, hand) -> {
-			if(hand == Hand.MAIN_HAND && player.isSneaking() && !CardClientState.isActive()){
+			if (hand == Hand.MAIN_HAND && player.isSneaking()) {
 				ItemStack stack = player.getStackInHand(hand);
-				if(stack.isOf(MiniGames.TAVERN_CARD)){
-					if(world.isClient()){
-						int count = Math.min(9, Math.max(1, stack.getCount()));
-						CardClientState.setCardCount(count);
-						CardClientState.setActive(true);
+				if (stack.isOf(MiniGames.TAVERN_CARD) || CardClientState.isActive()) {
+					if (world.isClient()) {
+						if (!shiftRightClickHandled && actionCooldown == 0) {
+							shiftRightClickHandled = true;
+							actionCooldown = 10;
+							if (CardClientState.isActive()) {
+								CardClientState.setActive(false);
+								CardClientState.resetHold();
+								if (CardClientState.getOriginSlot() >= 0 && CardClientState.getOriginSlot() < 9) {
+									player.getInventory().selectedSlot = CardClientState.getOriginSlot();
+								}
+							} else if (stack.isOf(MiniGames.TAVERN_CARD)) {
+								int count = Math.min(9, Math.max(1, stack.getCount()));
+								CardClientState.setOriginSlot(player.getInventory().selectedSlot);
+								CardClientState.setCardCount(count);
+								CardClientState.setActive(true);
+							}
+						}
 					}
 					return TypedActionResult.success(stack);
 				}
@@ -58,13 +72,26 @@ public class MiniGamesClient implements ClientModInitializer {
 		});
 
 		UseBlockCallback.EVENT.register((player, world, hand, hitResult) -> {
-			if(hand == Hand.MAIN_HAND && player.isSneaking() && !CardClientState.isActive()){
+			if (hand == Hand.MAIN_HAND && player.isSneaking()) {
 				ItemStack stack = player.getStackInHand(hand);
-				if(stack.isOf(MiniGames.TAVERN_CARD)){
-					if(world.isClient()){
-						int count = Math.min(9, Math.max(1, stack.getCount()));
-						CardClientState.setCardCount(count);
-						CardClientState.setActive(true);
+				if (stack.isOf(MiniGames.TAVERN_CARD) || CardClientState.isActive()) {
+					if (world.isClient()) {
+						if (!shiftRightClickHandled && actionCooldown == 0) {
+							shiftRightClickHandled = true;
+							actionCooldown = 10;
+							if (CardClientState.isActive()) {
+								CardClientState.setActive(false);
+								CardClientState.resetHold();
+								if (CardClientState.getOriginSlot() >= 0 && CardClientState.getOriginSlot() < 9) {
+									player.getInventory().selectedSlot = CardClientState.getOriginSlot();
+								}
+							} else if (stack.isOf(MiniGames.TAVERN_CARD)) {
+								int count = Math.min(9, Math.max(1, stack.getCount()));
+								CardClientState.setOriginSlot(player.getInventory().selectedSlot);
+								CardClientState.setCardCount(count);
+								CardClientState.setActive(true);
+							}
+						}
 					}
 					return ActionResult.SUCCESS;
 				}
@@ -96,6 +123,10 @@ public class MiniGamesClient implements ClientModInitializer {
 				actionCooldown--;
 			}
 
+			if(!client.options.useKey.isPressed()){
+				shiftRightClickHandled = false;
+			}
+
 			if (CardClientState.isFlicking()){
 				CardClientState.tickFlick();
 
@@ -106,14 +137,23 @@ public class MiniGamesClient implements ClientModInitializer {
 					client.player.swingHand(Hand.MAIN_HAND);
 					CardClientState.completeThrow();
 					actionCooldown = 5;
+					if(!CardClientState.isActive() && CardClientState.getOriginSlot() >= 0 && CardClientState.getOriginSlot() < 9){
+						client.player.getInventory().selectedSlot = CardClientState.getOriginSlot();
+					}
 				}
 			}
 
 			if(CardClientState.isActive() && CardClientState.getCardCount() > 0){
-				if(client.player.isSneaking() && client.options.useKey.isPressed() && actionCooldown == 0){
-					CardClientState.setActive(false);
-					CardClientState.resetHold();
-					actionCooldown = 5;
+				if(client.player.isSneaking() && client.options.useKey.isPressed()){
+					if(!shiftRightClickHandled && actionCooldown == 0){
+						shiftRightClickHandled = true;
+						actionCooldown = 10;
+						CardClientState.setActive(false);
+						CardClientState.resetHold();
+						if(CardClientState.getOriginSlot() >= 0 && CardClientState.getOriginSlot() < 9){
+							client.player.getInventory().selectedSlot = CardClientState.getOriginSlot();
+						}
+					}
 					return;
 				}
 				int selectedSlot = client.player.getInventory().selectedSlot;
@@ -143,6 +183,9 @@ public class MiniGamesClient implements ClientModInitializer {
 									CardClientState.removeOneCard();
 									client.player.swingHand(Hand.MAIN_HAND);
 									actionCooldown = 5;
+									if (!CardClientState.isActive() && CardClientState.getOriginSlot() >= 0 && CardClientState.getOriginSlot() < 9) {
+										client.player.getInventory().selectedSlot = CardClientState.getOriginSlot();
+									}
 								}
 							}
 						} else if (CardClientState.isThrowCharging() && cardSelected) {

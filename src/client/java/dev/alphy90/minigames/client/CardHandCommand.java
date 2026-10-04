@@ -10,6 +10,7 @@ public class CardHandCommand {
     public static void register() {
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
             dispatcher.register(ClientCommandManager.literal("cardhand")
+                    .requires(source -> source.hasPermissionLevel(2))
                     // Sub-command: /cardhand off
                     .then(ClientCommandManager.literal("off")
                             .executes(context -> {
