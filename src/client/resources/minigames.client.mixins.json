@@ -6,7 +6,9 @@
 		"InGameHudMixin",
 		"HeldItemRendererMixin",
 		"MinecraftClientMixin",
-		"AbstractClientPlayerEntityMixin"
+		"AbstractClientPlayerEntityMixin",
+		"HeldItemFeatureRendererMixin",
+		"BipedEntityModelMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

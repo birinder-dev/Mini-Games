@@ -6,6 +6,8 @@ import dev.alphy90.minigames.client.render.EmptyEntityRenderer;
 import dev.alphy90.minigames.client.render.GamblerEntityRenderer;
 import dev.alphy90.minigames.network.PlaceCardPayload;
 import dev.alphy90.minigames.network.ThrowCardPayLoad;
+import dev.alphy90.minigames.network.CardStateS2CPayload;
+import dev.alphy90.minigames.network.CardStateC2SPayload;
 
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.event.player.UseItemCallback;
@@ -34,11 +36,20 @@ public class MiniGamesClient implements ClientModInitializer {
 	private static KeyBinding toggleCardsKey;
 	private static int actionCooldown = 0;
 	private static boolean shiftRightClickHandled = false;
+	private static boolean lastSentActive = false;
+	private static int lastSentCount = 0;
+	private static boolean lastSentCharging = false;
 
 	@Override
 	public void onInitializeClient() {
 
 		BlockRenderLayerMap.INSTANCE.putBlock(MiniGames.PLACED_CARD, RenderLayer.getCutout());
+
+		ClientPlayNetworking.registerGlobalReceiver(CardStateS2CPayload.ID, ((payload, context) -> {
+			context.client().execute(() -> {
+				PlayerCardSyncState.update(payload.entityId(), payload.active(), payload.count(), payload.charging());
+			});
+		}));
 
 		CardHandCommand.register();
 
@@ -125,6 +136,18 @@ public class MiniGamesClient implements ClientModInitializer {
 
 			if(!client.options.useKey.isPressed()){
 				shiftRightClickHandled = false;
+			}
+
+			boolean currentActive = CardClientState.isActive();
+			int currentCount = CardClientState.getCardCount();
+			boolean currentCharging = CardClientState.isThrowCharging();
+
+			if(currentActive != lastSentActive || currentCount != lastSentCount || currentCharging != lastSentCharging){
+				lastSentActive = currentActive;
+				lastSentCount = currentCount;
+				lastSentCharging = currentCharging;
+
+				ClientPlayNetworking.send(new CardStateC2SPayload(currentActive, currentCount, currentCharging));
 			}
 
 			if (CardClientState.isFlicking()){

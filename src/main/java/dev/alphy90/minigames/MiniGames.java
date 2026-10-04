@@ -7,6 +7,8 @@ import dev.alphy90.minigames.entity.GamblerEntity;
 import dev.alphy90.minigames.entity.SeatEntity;
 import dev.alphy90.minigames.entity.CardProjectileEntity;
 import dev.alphy90.minigames.network.ThrowCardPayLoad;
+import dev.alphy90.minigames.network.CardStateC2SPayload;
+import dev.alphy90.minigames.network.CardStateS2CPayload;
 import dev.alphy90.minigames.network.PlaceCardPayload;
 import dev.alphy90.minigames.config.ModConfig;
 import dev.alphy90.minigames.command.MiniGamesConfigCommand;
@@ -15,6 +17,7 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
@@ -147,6 +150,18 @@ public class MiniGames implements ModInitializer {
 						0.6F, 1.2F + (payload.power() * 0.4F));
 
 			});
+		}));
+
+		// card view
+		PayloadTypeRegistry.playC2S().register(CardStateC2SPayload.ID, CardStateC2SPayload.CODEC);
+		PayloadTypeRegistry.playS2C().register(CardStateS2CPayload.ID, CardStateS2CPayload.CODEC);
+
+		ServerPlayNetworking.registerGlobalReceiver(CardStateC2SPayload.ID, ((payload, context) -> {
+			ServerPlayerEntity sender = context.player();
+			CardStateS2CPayload s2c = new CardStateS2CPayload(sender.getId(), payload.active(), payload.count(), payload.charging());
+			for (ServerPlayerEntity tracking : PlayerLookup.tracking(sender)){
+				ServerPlayNetworking.send(tracking, s2c);
+			}
 		}));
 	}
 
