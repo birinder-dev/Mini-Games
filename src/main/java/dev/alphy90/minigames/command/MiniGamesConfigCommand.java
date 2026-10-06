@@ -11,8 +11,6 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
-import javax.swing.text.TabExpander;
-import java.text.Normalizer;
 
 public class MiniGamesConfigCommand {
 
@@ -119,13 +117,15 @@ public class MiniGamesConfigCommand {
         source.sendMessage(Text.literal("/minigames config get").formatted(Formatting.YELLOW)
                 .append(Text.literal(" - View current server setting").formatted(Formatting.GRAY)));
         source.sendMessage(Text.literal("/minigames config reload").formatted(Formatting.YELLOW)
+                .append(Text.literal(" - Reload config from disk").formatted(Formatting.GRAY)));
+        source.sendMessage(Text.literal("/minigames config reset").formatted(Formatting.YELLOW)
                 .append(Text.literal(" - Reset config to defaults").formatted(Formatting.GRAY)));
         source.sendMessage(Text.literal("/minigames config set <option> <val>").formatted(Formatting.YELLOW)
                 .append(Text.literal(" - Modify config options (despawn, damage, pickup, gambler, crafting, maxcards)").formatted(Formatting.GRAY)));
         source.sendMessage(Text.literal("/cardhand <1-9|off>").formatted(Formatting.YELLOW)
                 .append(Text.literal(" - Toggle/test client card hand").formatted(Formatting.GRAY)));
         source.sendMessage(Text.literal("Controls: ").formatted(Formatting.AQUA, Formatting.BOLD)
-                .append(Text.literal("[0] Toggle Hand (Rebindable in Controls) | [Right-Click Hold/Release Throw | [Shift+Right-Click] Place").formatted(Formatting.GRAY)));
+                .append(Text.literal("[O] Toggle Hand (Rebindable in Controls) | [Right-Click Hold/Release] Throw | [Shift+Right-Click] Place").formatted(Formatting.GRAY)));
         return 1;
     }
 }

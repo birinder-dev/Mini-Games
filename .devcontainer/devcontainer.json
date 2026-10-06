@@ -1,0 +1,19 @@
+{
+  "name": "Mini-games Playable Demo",
+  "image": "mcr.microsoft.com/devcontainers/java:1-21-bookworm",
+  "features": {
+    "ghcr.io/devcontainers/features/desktop-lite:1": {
+      "version": "latest",
+      "password": "demo"
+    }
+  },
+  "forwardPorts": [6080],
+  "portsAttributes": {
+    "6080": {
+      "label": "Play Mini-Games Demo",
+      "onAutoForward": "openBrowser"
+    }
+  },
+  "postCreateCommand": "sudo apt-get update && sudo apt-get install -y libgl1-mesa-dri libgl1-mesa-glx mesa-utils && chmod +x .devcontainer/start-demo.sh",
+  "postStartCommand": "bash .devcontainer/start-demo.sh"
+}
