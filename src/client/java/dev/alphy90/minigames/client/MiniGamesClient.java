@@ -114,8 +114,7 @@ public class MiniGamesClient implements ClientModInitializer {
 				"Toggle 3D Cards",
 				InputUtil.Type.KEYSYM,
 				GLFW.GLFW_KEY_O,
-				"Minigames"
-		));
+				"Minigames"));
 
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
 			while (toggleCardsKey.wasPressed()) {
@@ -128,13 +127,16 @@ public class MiniGamesClient implements ClientModInitializer {
 		EntityRendererRegistry.register(MiniGames.CARD_PROJECTILE, CardProjectileEntityRenderer::new);
 
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
-			if(client.player == null || client.world == null) return;
+			if (client.player == null || client.world == null)
+				return;
 
-			if(actionCooldown > 0){
+			PlayerCardSyncState.tick(client);
+
+			if (actionCooldown > 0) {
 				actionCooldown--;
 			}
 
-			if(!client.options.useKey.isPressed()){
+			if (!client.options.useKey.isPressed()) {
 				shiftRightClickHandled = false;
 			}
 
@@ -142,7 +144,8 @@ public class MiniGamesClient implements ClientModInitializer {
 			int currentCount = CardClientState.getCardCount();
 			boolean currentCharging = CardClientState.isThrowCharging();
 
-			if(currentActive != lastSentActive || currentCount != lastSentCount || currentCharging != lastSentCharging){
+			if (currentActive != lastSentActive || currentCount != lastSentCount
+					|| currentCharging != lastSentCharging) {
 				lastSentActive = currentActive;
 				lastSentCount = currentCount;
 				lastSentCharging = currentCharging;
@@ -150,30 +153,31 @@ public class MiniGamesClient implements ClientModInitializer {
 				ClientPlayNetworking.send(new CardStateC2SPayload(currentActive, currentCount, currentCharging));
 			}
 
-			if (CardClientState.isFlicking()){
+			if (CardClientState.isFlicking()) {
 				CardClientState.tickFlick();
 
-				if(CardClientState.getFlickTicks() == 0 && CardClientState.hasPendingThrow()){
+				if (CardClientState.getFlickTicks() == 0 && CardClientState.hasPendingThrow()) {
 					float power = CardClientState.getPendingPower();
 					ClientPlayNetworking.send(new ThrowCardPayLoad(power));
 					CardClientState.removeOneCard();
 					client.player.swingHand(Hand.MAIN_HAND);
 					CardClientState.completeThrow();
 					actionCooldown = 5;
-					if(!CardClientState.isActive() && CardClientState.getOriginSlot() >= 0 && CardClientState.getOriginSlot() < 9){
+					if (!CardClientState.isActive() && CardClientState.getOriginSlot() >= 0
+							&& CardClientState.getOriginSlot() < 9) {
 						client.player.getInventory().selectedSlot = CardClientState.getOriginSlot();
 					}
 				}
 			}
 
-			if(CardClientState.isActive() && CardClientState.getCardCount() > 0){
-				if(client.player.isSneaking() && client.options.useKey.isPressed()){
-					if(!shiftRightClickHandled && actionCooldown == 0){
+			if (CardClientState.isActive() && CardClientState.getCardCount() > 0) {
+				if (client.player.isSneaking() && client.options.useKey.isPressed()) {
+					if (!shiftRightClickHandled && actionCooldown == 0) {
 						shiftRightClickHandled = true;
 						actionCooldown = 10;
 						CardClientState.setActive(false);
 						CardClientState.resetHold();
-						if(CardClientState.getOriginSlot() >= 0 && CardClientState.getOriginSlot() < 9){
+						if (CardClientState.getOriginSlot() >= 0 && CardClientState.getOriginSlot() < 9) {
 							client.player.getInventory().selectedSlot = CardClientState.getOriginSlot();
 						}
 					}
@@ -182,16 +186,17 @@ public class MiniGamesClient implements ClientModInitializer {
 				int selectedSlot = client.player.getInventory().selectedSlot;
 				boolean cardSelected = CardClientState.isCardSlot(selectedSlot);
 
-				if(client.options.useKey.isPressed() && cardSelected && !CardClientState.isFlicking()){
+				if (client.options.useKey.isPressed() && cardSelected && !CardClientState.isFlicking()) {
 					CardClientState.incrementHold();
 				} else {
 					int held = CardClientState.getHoldTicks();
 
-					if(held > 0 && actionCooldown == 0) {
+					if (held > 0 && actionCooldown == 0) {
 						// quick tap(4.5 blocks)
 						if (held < 20) {
 							HitResult crosshair = client.crosshairTarget;
-							if (crosshair != null && crosshair.getType() == HitResult.Type.BLOCK && crosshair instanceof BlockHitResult) {
+							if (crosshair != null && crosshair.getType() == HitResult.Type.BLOCK
+									&& crosshair instanceof BlockHitResult) {
 								BlockHitResult blockHit = (BlockHitResult) crosshair;
 								double distSq = client.player.getEyePos().squaredDistanceTo(blockHit.getPos());
 
@@ -199,14 +204,15 @@ public class MiniGamesClient implements ClientModInitializer {
 								BlockPos placePos = hitPos.offset(blockHit.getSide());
 
 								boolean isCard = client.world.getBlockState(hitPos).isOf(MiniGames.PLACED_CARD) ||
-								                 client.world.getBlockState(placePos).isOf(MiniGames.PLACED_CARD);
+										client.world.getBlockState(placePos).isOf(MiniGames.PLACED_CARD);
 
 								if (distSq <= 20.25 && !isCard) {
 									ClientPlayNetworking.send(new PlaceCardPayload(hitPos, blockHit.getSide()));
 									CardClientState.removeOneCard();
 									client.player.swingHand(Hand.MAIN_HAND);
 									actionCooldown = 5;
-									if (!CardClientState.isActive() && CardClientState.getOriginSlot() >= 0 && CardClientState.getOriginSlot() < 9) {
+									if (!CardClientState.isActive() && CardClientState.getOriginSlot() >= 0
+											&& CardClientState.getOriginSlot() < 9) {
 										client.player.getInventory().selectedSlot = CardClientState.getOriginSlot();
 									}
 								}

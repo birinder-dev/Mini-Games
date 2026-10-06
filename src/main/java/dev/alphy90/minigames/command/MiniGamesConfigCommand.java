@@ -11,13 +11,18 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
+import javax.swing.text.TabExpander;
+import java.text.Normalizer;
+
 public class MiniGamesConfigCommand {
 
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
         dispatcher.register(CommandManager.literal("minigames")
+                                .executes(context -> sendHelp(context.getSource()))
+                                .then(CommandManager.literal("help").executes(context -> sendHelp(context.getSource())))
+                                .then(CommandManager.literal("config")
                 // Require OP level 2+
                 .requires(source -> source.hasPermissionLevel(2))
-                .then(CommandManager.literal("config")
                         .then(CommandManager.literal("get").executes(context -> sendConfigStatus(context.getSource())))
                         .then(CommandManager.literal("reload").executes(context -> {
                             ModConfig.load();
@@ -104,6 +109,23 @@ public class MiniGamesConfigCommand {
                 .append(Text.literal(String.valueOf(c.allowCrafting)).formatted(Formatting.AQUA)));
         source.sendMessage(Text.literal("Max Cards in Hand & Stack: ").formatted(Formatting.YELLOW)
                 .append(Text.literal(String.valueOf(c.maxCardsInHand)).formatted(Formatting.AQUA)));
+        return 1;
+    }
+
+    private static int sendHelp(ServerCommandSource source){
+        source.sendMessage(Text.literal("=== MiniGames Commands & Controls ===").formatted(Formatting.GOLD, Formatting.BOLD));
+        source.sendMessage(Text.literal("/minigames help").formatted(Formatting.YELLOW)
+                .append(Text.literal(" - Show this command list").formatted(Formatting.GRAY)));
+        source.sendMessage(Text.literal("/minigames config get").formatted(Formatting.YELLOW)
+                .append(Text.literal(" - View current server setting").formatted(Formatting.GRAY)));
+        source.sendMessage(Text.literal("/minigames config reload").formatted(Formatting.YELLOW)
+                .append(Text.literal(" - Reset config to defaults").formatted(Formatting.GRAY)));
+        source.sendMessage(Text.literal("/minigames config set <option> <val>").formatted(Formatting.YELLOW)
+                .append(Text.literal(" - Modify config options (despawn, damage, pickup, gambler, crafting, maxcards)").formatted(Formatting.GRAY)));
+        source.sendMessage(Text.literal("/cardhand <1-9|off>").formatted(Formatting.YELLOW)
+                .append(Text.literal(" - Toggle/test client card hand").formatted(Formatting.GRAY)));
+        source.sendMessage(Text.literal("Controls: ").formatted(Formatting.AQUA, Formatting.BOLD)
+                .append(Text.literal("[0] Toggle Hand (Rebindable in Controls) | [Right-Click Hold/Release Throw | [Shift+Right-Click] Place").formatted(Formatting.GRAY)));
         return 1;
     }
 }

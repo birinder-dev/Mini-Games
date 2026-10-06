@@ -49,11 +49,10 @@ public abstract class HeldItemRendererMixin {
         boolean isThrowing = CardClientState.isThrowCharging() || CardClientState.isFlicking();
         if(!player.isInvisible()){
             if(isThrowing){
-                float charge = CardClientState.getChargeProgress();
                 matrices.push();
-                matrices.translate(0.04F, -0.24F + pitchFactor * -0.06F, -0.48F - (0.08F * charge));
+                matrices.translate(0.04F, -0.24F + pitchFactor * -0.06F, -0.48F);
 
-                matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(58.0F - (15.0F * charge)));
+                matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(58.0F));
                 matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(78.0F));
                 matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(-10.0F));
 
@@ -73,9 +72,9 @@ public abstract class HeldItemRendererMixin {
         }
 
         matrices.push();
-        // Base position: negative X rotation pulls the LOWER edge toward your chest
+        // Base position: fanned state sits lower down
         matrices.translate(0.0F, -0.36F + pitchFactor * -0.05F, -0.42F);
-        matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(-20.0F)); // <-- Changed to negative to bring bottom toward you!
+        matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(-20.0F));
 
         float cardW = 0.33F;
         float cardH = 0.35F;
@@ -124,15 +123,13 @@ public abstract class HeldItemRendererMixin {
 
             if(isSelected && isThrowing){
 
-                cardX = 0.12F;
-                cardPivotY = 0.01F;
-                arcZ = -0.04F;
+                // Positioned right inside the right hand in first person
+                cardX = 0.22F;
+                cardPivotY = 0.22F;
+                arcZ = -0.05F;
 
                 if(CardClientState.isThrowCharging()){
                     float charge = CardClientState.getChargeProgress();
-                    cardPivotY -= 0.04F * charge;
-                    arcZ -= 0.08F * charge;
-
                     float shake = (float)Math.sin((player.age + tickDelta) * 2.5F) * (0.0012F + 0.0022F * charge);
                     cardX += shake;
                     cardPivotY += shake * 0.5F;
