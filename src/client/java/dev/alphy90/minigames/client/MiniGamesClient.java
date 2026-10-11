@@ -21,6 +21,7 @@ import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.minecraft.item.ItemStack;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.session.telemetry.ThreadedLogWriter;
+import net.minecraft.item.MinecartItem;
 import net.minecraft.util.Hand;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.TypedActionResult;
@@ -42,6 +43,11 @@ public class MiniGamesClient implements ClientModInitializer {
 
 	@Override
 	public void onInitializeClient() {
+
+		net.minecraft.client.render.block.entity.BlockEntityRendererFactories.register(
+				MiniGames.GAMBLING_TABLE_BLOCK_ENTITY,
+				dev.alphy90.minigames.client.render.GamblingTableBlockEntityRenderer::new
+		);
 
 		BlockRenderLayerMap.INSTANCE.putBlock(MiniGames.PLACED_CARD, RenderLayer.getCutout());
 

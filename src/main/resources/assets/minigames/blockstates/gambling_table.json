@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": {"model": "minigames:block/gambling_table"},
+    "facing=east": {"model": "minigames:block/gambling_table", "y": 90},
+    "facing=south": {"model": "minigames:block/gambling_table", "y": 180},
+    "facing=west": {"model": "minigames:block/gambling_table", "y": 270}
+  }
+}

@@ -1,0 +1,70 @@
+{
+  "textures": {
+    "felt": "minecraft:block/green_wool",
+    "wood": "minecraft:block/dark_oak_planks",
+    "particle": "minecraft:block/green_wool"
+  },
+  "elements": [
+    {
+      "name": "tabletop",
+      "from": [0, 13, 0],
+      "to": [16, 16, 16],
+      "faces": {
+        "north": {"texture": "#wood", "culface": "north"},
+        "east": {"texture": "#wood", "culface": "east"},
+        "south": {"texture": "#wood", "culface": "south"},
+        "west": {"texture": "#wood", "culface": "west"},
+        "up": {"texture": "#felt", "culface": "up"},
+        "down": {"texture": "#wood"}
+      }
+    },
+    {
+      "name": "leg_nw",
+      "from": [1, 0, 1],
+      "to": [3.5, 13, 3.5],
+      "faces": {
+        "north": {"texture": "#wood"},
+        "east": {"texture": "#wood"},
+        "south": {"texture": "#wood"},
+        "west": {"texture": "#wood"},
+        "down": {"texture": "#wood", "culface": "down"}
+      }
+    },
+    {
+      "name": "leg_ne",
+      "from": [12.5, 0, 1],
+      "to": [15, 13, 13.5],
+      "faces": {
+        "north": {"texture": "#wood"},
+        "east": {"texture": "#wood"},
+        "south": {"texture": "#wood"},
+        "west": {"texture": "#wood"},
+        "down": {"texture": "#wood", "culface": "down"}
+      }
+    },
+    {
+      "name": "leg_sw",
+      "from": [1, 0, 12.5],
+      "to": [3.5, 13, 15],
+      "faces": {
+        "north": {"texture": "#wood"},
+        "east": {"texture": "#wood"},
+        "south": {"texture": "#wood"},
+        "west": {"texture": "#wood"},
+        "down": {"texture": "#wood", "culface": "down"}
+      }
+    },
+    {
+      "name": "leg_se",
+      "from": [12.5, 0, 12.5],
+      "to": [15, 13, 15],
+      "faces": {
+        "north": {"texture": "#wood"},
+        "east": {"texture":  "#wood"},
+        "south": {"texture": "#wood"},
+        "west": {"texture": "#wood"},
+        "down": {"texture": "#wood", "culface": "down"},
+      }
+    }
+  ]
+}

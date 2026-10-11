@@ -45,9 +45,23 @@ import org.slf4j.LoggerFactory;
 public class MiniGames implements ModInitializer {
 	public static final String MOD_ID = "minigames";
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
+
+
 	public static final Block GAMBLING_STOOL = new GamblingStoolBlock(
 			AbstractBlock.Settings.create().nonOpaque().strength(1.5F));
 	public static final Item GAMBLING_STOOL_ITEM = new BlockItem(GAMBLING_STOOL, new Item.Settings());
+
+
+	public static final Block GAMBLING_TABLE = new dev.alphy90.minigames.block.GamblingTableBlock(
+			AbstractBlock.Settings.create().nonOpaque().strength(2.0F));
+	public static final Item GAMBLING_TABLE_ITEM = new BlockItem(GAMBLING_TABLE, new Item.Settings());
+	public static final net.minecraft.block.entity.BlockEntityType<dev.alphy90.minigames.block.entity.GamblingTableBlockEntity> GAMBLING_TABLE_BLOCK_ENTITY = Registry.register(
+			Registries.BLOCK_ENTITY_TYPE,
+			id("gambling_table"),
+			net.minecraft.block.entity.BlockEntityType.Builder.create(dev.alphy90.minigames.block.entity.GamblingTableBlockEntity::new, GAMBLING_TABLE).build()
+	);
+
+
 	public static final Block PLACED_CARD = new CardBlock(
 			AbstractBlock.Settings.create()
 					.breakInstantly()
@@ -93,6 +107,8 @@ public class MiniGames implements ModInitializer {
 		Registry.register(Registries.ITEM, id("gambling_stool"), GAMBLING_STOOL_ITEM);
 		Registry.register(Registries.ITEM, id("gambler_spawn_egg"), GAMBLER_SPAWN_EGG);
 		Registry.register(Registries.BLOCK, id("placed_card"), PLACED_CARD);
+		Registry.register(Registries.BLOCK, id("gambling_table"), GAMBLING_TABLE);
+		Registry.register(Registries.ITEM, id("gambling_table"), GAMBLING_TABLE_ITEM);
 
 		FabricDefaultAttributeRegistry.register(GAMBLER, GamblerEntity.createGamblerAttributes());
 
@@ -102,6 +118,7 @@ public class MiniGames implements ModInitializer {
 
 		ItemGroupEvents.modifyEntriesEvent(ItemGroups.FUNCTIONAL).register(entries -> {
 			entries.add(GAMBLING_STOOL_ITEM);
+			entries.add(GAMBLING_TABLE_ITEM);
 		});
 
 		ItemGroupEvents.modifyEntriesEvent(ItemGroups.TOOLS).register(entries -> {
