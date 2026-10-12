@@ -4,10 +4,7 @@ import dev.alphy90.minigames.MiniGames;
 import dev.alphy90.minigames.client.render.CardProjectileEntityRenderer;
 import dev.alphy90.minigames.client.render.EmptyEntityRenderer;
 import dev.alphy90.minigames.client.render.GamblerEntityRenderer;
-import dev.alphy90.minigames.network.PlaceCardPayload;
-import dev.alphy90.minigames.network.ThrowCardPayLoad;
-import dev.alphy90.minigames.network.CardStateS2CPayload;
-import dev.alphy90.minigames.network.CardStateC2SPayload;
+import dev.alphy90.minigames.network.*;
 
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.event.player.UseItemCallback;
@@ -22,6 +19,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.session.telemetry.ThreadedLogWriter;
 import net.minecraft.item.MinecartItem;
+import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.util.Hand;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.TypedActionResult;
@@ -48,6 +46,12 @@ public class MiniGamesClient implements ClientModInitializer {
 				MiniGames.GAMBLING_TABLE_BLOCK_ENTITY,
 				dev.alphy90.minigames.client.render.GamblingTableBlockEntityRenderer::new
 		);
+
+		ClientPlayNetworking.registerGlobalReceiver(TablePlayingPayload.ID, ((payload, context) -> {
+			context.client().execute(() -> {
+				CardClientState.setTablePlaying(payload.isTablePlaying());
+			});
+		}));
 
 		BlockRenderLayerMap.INSTANCE.putBlock(MiniGames.PLACED_CARD, RenderLayer.getCutout());
 
@@ -135,6 +139,10 @@ public class MiniGamesClient implements ClientModInitializer {
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
 			if (client.player == null || client.world == null)
 				return;
+
+			if (!client.player.hasVehicle() && CardClientState.isTablePlaying()) {
+				CardClientState.setTablePlaying(false);
+			}
 
 			PlayerCardSyncState.tick(client);
 

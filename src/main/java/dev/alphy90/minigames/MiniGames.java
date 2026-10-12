@@ -2,14 +2,10 @@ package dev.alphy90.minigames;
 
 import dev.alphy90.minigames.block.GamblingStoolBlock;
 import dev.alphy90.minigames.block.CardBlock;
-import dev.alphy90.minigames.network.PlaceCardPayload;
+import dev.alphy90.minigames.network.*;
 import dev.alphy90.minigames.entity.GamblerEntity;
 import dev.alphy90.minigames.entity.SeatEntity;
 import dev.alphy90.minigames.entity.CardProjectileEntity;
-import dev.alphy90.minigames.network.ThrowCardPayLoad;
-import dev.alphy90.minigames.network.CardStateC2SPayload;
-import dev.alphy90.minigames.network.CardStateS2CPayload;
-import dev.alphy90.minigames.network.PlaceCardPayload;
 import dev.alphy90.minigames.config.ModConfig;
 import dev.alphy90.minigames.command.MiniGamesConfigCommand;
 
@@ -172,6 +168,8 @@ public class MiniGames implements ModInitializer {
 		// card view
 		PayloadTypeRegistry.playC2S().register(CardStateC2SPayload.ID, CardStateC2SPayload.CODEC);
 		PayloadTypeRegistry.playS2C().register(CardStateS2CPayload.ID, CardStateS2CPayload.CODEC);
+
+		PayloadTypeRegistry.playS2C().register(TablePlayingPayload.ID, TablePlayingPayload.CODEC);
 
 		ServerPlayNetworking.registerGlobalReceiver(CardStateC2SPayload.ID, ((payload, context) -> {
 			ServerPlayerEntity sender = context.player();

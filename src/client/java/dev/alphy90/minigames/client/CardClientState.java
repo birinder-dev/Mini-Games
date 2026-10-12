@@ -164,5 +164,16 @@ public class CardClientState {
     public static void setOriginSlot(int slot){
         originSlot = slot;
     }
+
+    //table playing
+    private static boolean tablePlaying = false;
+
+    public static boolean isTablePlaying(){
+        return tablePlaying;
+    }
+
+    public static void setTablePlaying(boolean playing){
+        tablePlaying = playing;
+    }
 }
 

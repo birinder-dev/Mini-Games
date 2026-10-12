@@ -17,13 +17,10 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
-import net.minecraft.world.BlockLocating;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
-import org.lwjgl.opengl.ARBProgramInterfaceQuery;
 
-import javax.xml.stream.events.StartDocument;
 
 public class GamblingTableBlock extends BlockWithEntity{
     public static final MapCodec<GamblingTableBlock> CODEC = createCodec(GamblingTableBlock::new);
