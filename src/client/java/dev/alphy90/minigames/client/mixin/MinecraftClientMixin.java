@@ -16,7 +16,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import javax.smartcardio.Card;
 
 @Mixin(MinecraftClient.class)
 public abstract class MinecraftClientMixin {
@@ -27,7 +26,7 @@ public abstract class MinecraftClientMixin {
 
     @Inject(method = "doAttack", at = @At("HEAD"), cancellable = true)
     private void lockAttackInCardMode(CallbackInfoReturnable<Boolean> cir){
-        if (CardClientState.isActive()) {
+        if (CardClientState.isActive() || CardClientState.isTablePlaying()) {
             cir.setReturnValue(false);
             return;
         }
@@ -39,14 +38,14 @@ public abstract class MinecraftClientMixin {
 
     @Inject(method = "doItemUse", at = @At("HEAD"), cancellable = true)
     private void lockItemUseInCard(CallbackInfo ci){
-        if (CardClientState.isActive()){
+        if (CardClientState.isActive() || CardClientState.isTablePlaying()){
             ci.cancel();
         }
     }
 
     @Inject(method = "handleBlockBreaking", at = @At("HEAD"), cancellable = true)
     private void lockBlockBreakingInCardMode(boolean breaking, CallbackInfo ci) {
-        if (breaking && CardClientState.isActive()) ci.cancel();
+        if (breaking && (CardClientState.isActive() || CardClientState.isTablePlaying())) ci.cancel();
     }
 }
 

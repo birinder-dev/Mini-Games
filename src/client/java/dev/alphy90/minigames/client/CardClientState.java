@@ -1,15 +1,25 @@
 package dev.alphy90.minigames.client;
 
 import dev.alphy90.minigames.config.ModConfig;
+import dev.alphy90.minigames.game.TavernCard;
+import dev.alphy90.minigames.game.CardDeck;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class CardClientState {
     private static boolean active = false;
     private static int cardCount = 1;
 
+    private static final List<TavernCard> handCards = new ArrayList<>();
+
     private static int holdTicks = 0;
     private static boolean throwCharging = false;
 
     public static boolean isActive(){
+        if(tablePlaying && handCards.isEmpty()){
+            setCardCount(cardCount > 0 ? cardCount : 5);
+        }
         return active;
     }
 
@@ -24,6 +34,8 @@ public class CardClientState {
     public static void setCardCount(int count){
         int max = ModConfig.get().maxCardsInHand;
         cardCount = Math.max(0, Math.min(max, count));
+        while (handCards.size() < cardCount) handCards.add(CardDeck.randomCard());
+        while (handCards.size() > cardCount) handCards.remove(handCards.size() - 1);
         if(cardCount == 0){
             active = false;
             resetHold();
@@ -167,6 +179,7 @@ public class CardClientState {
 
     //table playing
     private static boolean tablePlaying = false;
+    private static boolean pendingRound = true;
 
     public static boolean isTablePlaying(){
         return tablePlaying;
@@ -174,6 +187,35 @@ public class CardClientState {
 
     public static void setTablePlaying(boolean playing){
         tablePlaying = playing;
+        if(tablePlaying){
+            pendingRound = true;
+            if(handCards.isEmpty()){
+                setCardCount(cardCount > 0 ? cardCount : 5);
+            }
+        }
+    }
+
+    public static boolean isPendingRound(){
+        return pendingRound;
+    }
+
+    public static void setPendingRound(boolean pending){
+        pendingRound = pending;
+    }
+
+    public static TavernCard getCard(int index){
+        return (index >= 0 && index < handCards.size()) ? handCards.get(index) : null;
+    }
+
+    public static void removeCardAt(int index){
+        if(index >= 0 && index < handCards.size()){
+            handCards.remove(index);
+            cardCount = handCards.size();
+            if(cardCount == 0){
+                active = false;
+                resetHold();
+            }
+        }
     }
 }
 

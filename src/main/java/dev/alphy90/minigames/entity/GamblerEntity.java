@@ -2,6 +2,7 @@ package dev.alphy90.minigames.entity;
 
 import dev.alphy90.minigames.entity.ai.GamblerSeekStoolGoal;
 
+import net.minecraft.block.Block;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ai.goal.LookAroundGoal;
 import net.minecraft.entity.ai.goal.SwimGoal;
@@ -14,6 +15,8 @@ import net.minecraft.entity.player.PlayerEntity;
 
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 
 public class GamblerEntity extends PathAwareEntity {
@@ -50,16 +53,31 @@ public class GamblerEntity extends PathAwareEntity {
 
     @Override
     public ActionResult interactMob(PlayerEntity player, Hand hand){
-        // right click to make em unsit
         if(this.hasVehicle()){
-            if(!this.getWorld().isClient()){
-                this.dismountVehicle();
+            if(this.getWorld().isClient()){
+                return ActionResult.SUCCESS;
             }
-            return ActionResult.success(this.getWorld().isClient());
+            if(player instanceof net.minecraft.server.network.ServerPlayerEntity serverPlayer){
+                //while sneaking
+                if(player.isSneaking()){
+                    this.dismountVehicle();
+                    return ActionResult.SUCCESS;
+                }
+
+                BlockPos stoolPos = this.getVehicle() != null ? this.getVehicle().getBlockPos() : this.getBlockPos();
+                for(net.minecraft.util.math.Direction dir : Direction.Type.HORIZONTAL){
+                    BlockPos tablePos = stoolPos.offset(dir);
+                    if(this.getWorld().getBlockEntity(tablePos) instanceof dev.alphy90.minigames.block.entity.GamblingTableBlockEntity tableBe){
+                        if(tableBe.areGameConditionsMet((net.minecraft.server.world.ServerWorld)this.getWorld(), serverPlayer)){
+                            net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(serverPlayer, new dev.alphy90.minigames.network.TablePlayingPayload(true));
+                            return ActionResult.SUCCESS;
+                        }
+                    }
+                }
+            }
+            return ActionResult.CONSUME;
         }
         return super.interactMob(player, hand);
     }
 
 }
-
-

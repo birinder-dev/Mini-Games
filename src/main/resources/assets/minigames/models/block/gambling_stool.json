@@ -1,6 +1,136 @@
 {
-  "parent": "minecraft:block/cube_all",
   "textures": {
-    "all": "minecraft:block/oak_planks"
-  }
+    "wood": "minecraft:block/dark_oak_planks",
+    "cushion": "minecraft:block/red_wool",
+    "particle": "minecraft:block/dark_oak_planks"
+  },
+  "elements": [
+    {
+      "name": "seat_top",
+      "from": [3, 8, 3],
+      "to": [13, 10, 13],
+      "faces": {
+        "north": {"texture": "#wood"},
+        "east": {"texture": "#wood"},
+        "south": {"texture": "#wood"},
+        "west": {"texture": "#wood"},
+        "up": {"texture": "#cushion"},
+        "down": {"texture": "#wood"}
+      }
+    },
+    {
+  "name": "leg_nw",
+  "from": [4, 0, 4],
+  "to": [6, 8, 6],
+  "faces": {
+    "north": {"texture": "#wood"},
+    "east": {"texture": "#wood"},
+    "south": {"texture": "#wood"},
+    "west": {"texture": "#wood"},
+    "down": {"texture": "#wood", "cullface": "down"}
+    }
+  },
+    {
+      "name": "leg_ne",
+      "from": [
+        10,
+        0,
+        4
+      ],
+      "to": [
+        12,
+        8,
+        6
+      ],
+      "faces": {
+        "north": {
+          "texture": "#wood"
+        },
+        "east": {
+          "texture": "#wood"
+        },
+        "south": {
+          "texture": "#wood"
+        },
+        "west": {
+          "texture": "#wood"
+        },
+        "down": {
+          "texture": "#wood",
+          "cullface": "down"
+        }
+    }
+  },
+    {
+    "name": "leg_sw",
+    "from": [4, 0, 10
+    ],
+    "to": [
+    6, 8, 12
+    ],
+    "faces": {
+    "north": {"texture": "#wood"},
+    "east": {"texture": "#wood"},
+    "south": {"texture": "#wood"},
+    "west": {"texture": "#wood"},
+    "down": {"texture": "#wood", "cullface": "down"}
+    }
+  },
+    {
+  "name": "leg_se",
+  "from": [10, 0, 10],
+    "to": [12, 8, 12],
+    "faces": {
+    "north": {"texture": "#wood"},
+    "east": {"texture": "#wood"},
+    "south": {"texture": "#wood"},
+    "west": {"texture": "#wood"},
+    "down": {"texture": "#wood", "cullface": "down"}
+    }
+  },
+    {
+      "name": "brace_north",
+      "from": [6, 3, 4.5],
+      "to": [10, 4, 5.5],
+      "faces": {
+        "north": {"texture": "#wood"},
+        "south": {"texture": "#wood"},
+        "up": {"texture": "#wood"},
+        "down" : {"texture": "#wood"}
+      }
+    },
+    {
+      "name": "brace_south",
+      "from": [6, 3, 10.5],
+      "to": [10, 4, 11.5],
+      "faces": {
+        "north": {"texture": "#wood"},
+        "south": {"texture": "#wood"},
+        "up": {"texture": "#wood"},
+        "down": {"texture": "#wood"}
+      }
+    },
+    {
+      "name": "brace_west",
+      "from": [4.5, 3, 6],
+      "to": [5.5, 4, 10],
+      "faces": {
+        "east": {"texture": "#wood"},
+        "west": {"texture": "#wood"},
+        "up": {"texture": "#wood"},
+        "down": {"texture": "#wood"}
+      }
+    },
+    {
+      "name": "brace_east",
+      "from": [10.5, 3, 6],
+      "to": [11.5, 4, 10],
+      "faces": {
+        "east": {"texture": "#wood"},
+        "west": {"texture": "#wood"},
+        "up": {"texture": "#wood"},
+        "down": {"texture": "#wood"}
+      }
+    }
+  ]
 }

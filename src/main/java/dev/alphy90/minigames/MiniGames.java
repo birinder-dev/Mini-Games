@@ -2,6 +2,7 @@ package dev.alphy90.minigames;
 
 import dev.alphy90.minigames.block.GamblingStoolBlock;
 import dev.alphy90.minigames.block.CardBlock;
+import dev.alphy90.minigames.game.TavernCard;
 import dev.alphy90.minigames.network.*;
 import dev.alphy90.minigames.entity.GamblerEntity;
 import dev.alphy90.minigames.entity.SeatEntity;
@@ -177,6 +178,18 @@ public class MiniGames implements ModInitializer {
 			for (ServerPlayerEntity tracking : PlayerLookup.tracking(sender)){
 				ServerPlayNetworking.send(tracking, s2c);
 			}
+		}));
+
+		PayloadTypeRegistry.playC2S().register(PlayTableCardPayLoad.ID, PlayTableCardPayLoad.CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(PlayTableCardPayLoad.ID, ((payload, context) -> {
+			context.server().execute(() -> {
+				ServerPlayerEntity player = context.player();
+				ServerWorld world = player.getServerWorld();
+				if(world.getBlockEntity(payload.tablePos()) instanceof dev.alphy90.minigames.block.entity.GamblingTableBlockEntity tableBe){
+					dev.alphy90.minigames.game.CardSuit suit = dev.alphy90.minigames.game.CardSuit.values()[payload.suitOrdinal()];
+					tableBe.playPlayerCard(new TavernCard(suit, payload.value()), player);
+				}
+			});
 		}));
 	}
 

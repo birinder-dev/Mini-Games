@@ -21,7 +21,7 @@ public class InGameHudMixin {
 
     @Inject(method = "renderHeldItemTooltip", at = @At("HEAD"), cancellable = true)
     private void hideHeldItemTooltip(DrawContext context, CallbackInfo ci){
-        if(CardClientState.isActive()) ci.cancel();
+        if(CardClientState.isActive() || CardClientState.isTablePlaying()) ci.cancel();
     }
 
 
@@ -34,6 +34,11 @@ public class InGameHudMixin {
             cancellable = true
     )
     private void renderVirtualCardsInHotbar(DrawContext context, int x, int y, RenderTickCounter tickCounter, PlayerEntity player, ItemStack stack, int seed, CallbackInfo ci){
+        if(CardClientState.isTablePlaying()){
+            ci.cancel();
+            return;
+        }
+
         if(!CardClientState.isActive()){
             return;
         }

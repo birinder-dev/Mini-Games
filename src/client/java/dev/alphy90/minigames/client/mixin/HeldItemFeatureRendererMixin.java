@@ -5,6 +5,9 @@ import dev.alphy90.minigames.client.CardClientState;
 import dev.alphy90.minigames.client.PlayerCardSyncState;
 
 import dev.alphy90.minigames.entity.CardProjectileEntity;
+import dev.alphy90.minigames.game.CardSuit;
+import dev.alphy90.minigames.game.TavernCard;
+import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumer;
@@ -44,7 +47,7 @@ public class HeldItemFeatureRendererMixin {
     private void renderCustomCardHand(LivingEntity entity, ItemStack stack, ModelTransformationMode mode, Arm arm, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, CallbackInfo ci){
         if(entity instanceof PlayerEntity player){
             boolean isLocal = (player == MinecraftClient.getInstance().player);
-            boolean inCardState = isLocal ? CardClientState.isActive() : PlayerCardSyncState.isPlayerInCardState(player);
+            boolean inCardState = isLocal ? (CardClientState.isActive() || CardClientState.isTablePlaying()) : PlayerCardSyncState.isPlayerInCardState(player);
 
             if(inCardState){
                 if(arm == player.getMainArm()){
@@ -61,7 +64,9 @@ public class HeldItemFeatureRendererMixin {
                     boolean isLeft = (arm == Arm.LEFT);
                     matrices.translate((float) (isLeft ? -1 : 1) / 16.0F, 0.125F, -0.625F);
 
-                    renderThirdPersonCardHand(matrices, vertexConsumers, light, count, isCharging);
+                    boolean isSeated = player.hasVehicle();
+                    boolean showFront = isLocal || !isSeated;
+                    renderThirdPersonCardHand(matrices, vertexConsumers, light, count, isCharging, isLocal, showFront);
                     matrices.pop();
                 }
                 ci.cancel();
@@ -70,7 +75,7 @@ public class HeldItemFeatureRendererMixin {
     }
 
     @Unique
-    private void renderThirdPersonCardHand(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int count, boolean isCharging){
+    private void renderThirdPersonCardHand(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int count, boolean isCharging, boolean isLocal, boolean showFront){
         matrices.push();
         matrices.translate(0.0F, 0.04F, 0.02F);
         matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(15.0F));
@@ -83,7 +88,8 @@ public class HeldItemFeatureRendererMixin {
             matrices.translate(0.04F, -0.14F, -0.02F);
             matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(-15.0F));
             matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(20.0F));
-            renderCardQuad(matrices, vertexConsumers, light, cardW, cardH);
+            TavernCard card = isLocal ? CardClientState.getCard(0) : null;
+            renderCardQuad(matrices, vertexConsumers, light, cardW, cardH, card, showFront);
         } else {
             float cardSpacing = count <= 1 ? 0.0F : Math.min(0.05F, 0.22F / count);
             float anglestep = count <= 1 ? 0.0F : Math.min(7.0F, 28.0F / count);
@@ -93,7 +99,8 @@ public class HeldItemFeatureRendererMixin {
                 matrices.push();
                 matrices.translate(t * cardSpacing, -(t*t) * 0.003F, i * 0.003F);
                 matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(-t * anglestep));
-                renderCardQuad(matrices, vertexConsumers, light, cardW, cardH);
+                TavernCard card = isLocal ? CardClientState.getCard(i) : null;
+                renderCardQuad(matrices, vertexConsumers, light, cardW, cardH, card, showFront);
                 matrices.pop();
             }
         }
@@ -101,22 +108,67 @@ public class HeldItemFeatureRendererMixin {
     }
 
     @Unique
-    private void renderCardQuad(MatrixStack matrices, VertexConsumerProvider vertexConsumer, int light, float cardW, float cardH){
+    private void renderCardQuad(MatrixStack matrices, VertexConsumerProvider vertexConsumer, int light, float cardW, float cardH, TavernCard card, boolean showFront){
         VertexConsumer buffer = vertexConsumer.getBuffer(RenderLayer.getEntityCutoutNoCull(CARD_TEXTURE));
         MatrixStack.Entry entry = matrices.peek();
         Matrix4f pos = entry.getPositionMatrix();
         float halfW = cardW / 2.0F;
 
+        int r = 240;
+        int g = 240;
+        int b = 240;
+        if(showFront && card != null){
+            if(card.suit() == CardSuit.SWORD){
+                r = 225; g = 65; b = 65;
+            } else {
+                r = 70; g = 130; b = 185;
+            }
+        }
+
         //front face
-        buffer.vertex(pos, -halfW, 0.0F, 0.0F).color(255, 255, 255, 255).texture(0.0F, 1.0F).overlay(OverlayTexture.DEFAULT_UV).light(light).normal(entry, 0.0F, 0.0F, 1.0F);
-        buffer.vertex(pos, halfW, 0.0F, 0.0F).color(255, 255, 255, 255).texture(1.0F, 1.0F).overlay(OverlayTexture.DEFAULT_UV).light(light).normal(entry, 0.0F, 0.0F, 1.0F);
-        buffer.vertex(pos, halfW, cardH, 0.0F).color(255, 255, 255, 255).texture(1.0F, 0.0F).overlay(OverlayTexture.DEFAULT_UV).light(light).normal(entry, 0.0F, 0.0F, 1.0F);
-        buffer.vertex(pos, -halfW, cardH, 0.0F).color(255, 255, 255, 255).texture(0.0F, 0.0F).overlay(OverlayTexture.DEFAULT_UV).light(light).normal(entry, 0.0F, 0.0F, 1.0F);
+        buffer.vertex(pos, -halfW, 0.0F, 0.0F).color(r, g, b, 255).texture(0.0F, 1.0F).overlay(OverlayTexture.DEFAULT_UV).light(light).normal(entry, 0.0F, 0.0F, 1.0F);
+        buffer.vertex(pos, halfW, 0.0F, 0.0F).color(r, g, b, 255).texture(1.0F, 1.0F).overlay(OverlayTexture.DEFAULT_UV).light(light).normal(entry, 0.0F, 0.0F, 1.0F);
+        buffer.vertex(pos, halfW, cardH, 0.0F).color(r, g, b, 255).texture(1.0F, 0.0F).overlay(OverlayTexture.DEFAULT_UV).light(light).normal(entry, 0.0F, 0.0F, 1.0F);
+        buffer.vertex(pos, -halfW, cardH, 0.0F).color(r, g, b, 255).texture(0.0F, 0.0F).overlay(OverlayTexture.DEFAULT_UV).light(light).normal(entry, 0.0F, 0.0F, 1.0F);
 
         //back face
-        buffer.vertex(pos, halfW, 0.0F, -0.001F).color(255, 255, 255, 255).texture(1.0F, 1.0F).overlay(OverlayTexture.DEFAULT_UV).light(light).normal(entry, 0.0F, 0.0F, -1.0F);
-        buffer.vertex(pos, -halfW, 0.0F, -0.001F).color(255, 255, 255, 255).texture(0.0F, 1.0F).overlay(OverlayTexture.DEFAULT_UV).light(light).normal(entry, 0.0F, 0.0F, -1.0F);
-        buffer.vertex(pos, -halfW, cardH, -0.001F).color(255, 255, 255, 255).texture(0.0F, 0.0F).overlay(OverlayTexture.DEFAULT_UV).light(light).normal(entry, 0.0F, 0.0F, -1.0F);
-        buffer.vertex(pos, halfW, cardH, -0.001F).color(255, 255, 255, 255).texture(1.0F, 0.0F).overlay(OverlayTexture.DEFAULT_UV).light(light).normal(entry, 0.0F, 0.0F, -1.0F);
+        buffer.vertex(pos, halfW, 0.0F, -0.001F).color(230, 230, 230, 255).texture(1.0F, 1.0F).overlay(OverlayTexture.DEFAULT_UV).light(light).normal(entry, 0.0F, 0.0F, -1.0F);
+        buffer.vertex(pos, -halfW, 0.0F, -0.001F).color(230, 230, 230, 255).texture(0.0F, 1.0F).overlay(OverlayTexture.DEFAULT_UV).light(light).normal(entry, 0.0F, 0.0F, -1.0F);
+        buffer.vertex(pos, -halfW, cardH, -0.001F).color(230, 230, 230, 255).texture(0.0F, 0.0F).overlay(OverlayTexture.DEFAULT_UV).light(light).normal(entry, 0.0F, 0.0F, -1.0F);
+        buffer.vertex(pos, halfW, cardH, -0.001F).color(230, 230, 230, 255).texture(1.0F, 0.0F).overlay(OverlayTexture.DEFAULT_UV).light(light).normal(entry, 0.0F, 0.0F, -1.0F);
+
+        if(showFront && card != null){
+            TextRenderer textRenderer = MinecraftClient.getInstance().textRenderer;
+            String symbol = card.suit().getSymbol();
+            String number = String.valueOf(card.value());
+
+            //number in centre
+            matrices.push();
+            matrices.translate(0.0F, cardH * 0.50F, 0.002F);
+            float numScale = 0.0085F;
+            matrices.scale(numScale, -numScale, numScale);
+            int numW = textRenderer.getWidth(number);
+            textRenderer.draw(number, -numW / 2.0F, -textRenderer.fontHeight / 2.0F, 0xFFFFFFFF, true,
+                    matrices.peek().getPositionMatrix(), vertexConsumer, TextRenderer.TextLayerType.POLYGON_OFFSET, 0, light);
+            matrices.pop();
+
+            //top left corner
+            matrices.push();
+            matrices.translate(-halfW + 0.032F, cardH - 0.035F, 0.002F);
+            float symScale = 0.0040F;
+            matrices.scale(symScale, -symScale, symScale);
+            textRenderer.draw(symbol, 0.0F, 0.0F, 0xFFFFFFFF, true,
+                    matrices.peek().getPositionMatrix(), vertexConsumer, TextRenderer.TextLayerType.POLYGON_OFFSET, 0, light);
+            matrices.pop();
+
+            //bottom right
+            matrices.push();
+            matrices.translate(halfW - 0.032F, 0.035F, 0.002F);
+            matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(180.0F));
+            matrices.scale(symScale, -symScale, symScale);
+            textRenderer.draw(symbol, 0.0F, 0.0F, 0xFFFFFFFF, true,
+                    matrices.peek().getPositionMatrix(), vertexConsumer, TextRenderer.TextLayerType.POLYGON_OFFSET, 0, light);
+            matrices.pop();
+        }
     }
 }

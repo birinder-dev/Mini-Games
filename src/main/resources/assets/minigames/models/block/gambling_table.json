@@ -10,11 +10,11 @@
       "from": [0, 13, 0],
       "to": [16, 16, 16],
       "faces": {
-        "north": {"texture": "#wood", "culface": "north"},
-        "east": {"texture": "#wood", "culface": "east"},
-        "south": {"texture": "#wood", "culface": "south"},
-        "west": {"texture": "#wood", "culface": "west"},
-        "up": {"texture": "#felt", "culface": "up"},
+        "north": {"texture": "#wood", "cullface": "north"},
+        "east": {"texture": "#wood", "cullface": "east"},
+        "south": {"texture": "#wood", "cullface": "south"},
+        "west": {"texture": "#wood", "cullface": "west"},
+        "up": {"texture": "#felt", "cullface": "up"},
         "down": {"texture": "#wood"}
       }
     },
@@ -27,19 +27,19 @@
         "east": {"texture": "#wood"},
         "south": {"texture": "#wood"},
         "west": {"texture": "#wood"},
-        "down": {"texture": "#wood", "culface": "down"}
+        "down": {"texture": "#wood", "cullface": "down"}
       }
     },
     {
       "name": "leg_ne",
       "from": [12.5, 0, 1],
-      "to": [15, 13, 13.5],
+      "to": [15, 13, 3.5],
       "faces": {
         "north": {"texture": "#wood"},
         "east": {"texture": "#wood"},
         "south": {"texture": "#wood"},
         "west": {"texture": "#wood"},
-        "down": {"texture": "#wood", "culface": "down"}
+        "down": {"texture": "#wood", "cullface": "down"}
       }
     },
     {
@@ -51,7 +51,7 @@
         "east": {"texture": "#wood"},
         "south": {"texture": "#wood"},
         "west": {"texture": "#wood"},
-        "down": {"texture": "#wood", "culface": "down"}
+        "down": {"texture": "#wood", "cullface": "down"}
       }
     },
     {
@@ -60,10 +60,10 @@
       "to": [15, 13, 15],
       "faces": {
         "north": {"texture": "#wood"},
-        "east": {"texture":  "#wood"},
+        "east": {"texture": "#wood"},
         "south": {"texture": "#wood"},
         "west": {"texture": "#wood"},
-        "down": {"texture": "#wood", "culface": "down"},
+        "down": {"texture": "#wood", "cullface": "down"}
       }
     }
   ]

@@ -4,6 +4,9 @@ import dev.alphy90.minigames.MiniGames;
 import dev.alphy90.minigames.block.GamblingTableBlock;
 import dev.alphy90.minigames.block.entity.GamblingTableBlockEntity;
 
+import dev.alphy90.minigames.game.CardSuit;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumerProvider;
@@ -14,7 +17,6 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.RotationAxis;
-import org.apache.logging.log4j.core.appender.rolling.action.IfAll;
 import org.joml.Matrix4f;
 
 public class GamblingTableBlockEntityRenderer implements BlockEntityRenderer<GamblingTableBlockEntity>{
@@ -35,14 +37,15 @@ public class GamblingTableBlockEntityRenderer implements BlockEntityRenderer<Gam
 
         VertexConsumer buffer = vertexConsumers.getBuffer(RenderLayer.getEntityCutoutNoCull(CARD_TEXTURE));
 
-        float cardW = 0.22F;
-        float cardH = 0.32F;
+        // Card dimensions on table (wider, longer, and thicker deck)
+        float cardW = 0.27F;
+        float cardH = 0.42F;
 
-        //DECK PILE
-        int pileHeight = 8;
+        // DECK PILE
+        int pileHeight = Math.min(8, be.getPileCount());
         for (int i = 0; i < pileHeight; i++){
             matrices.push();
-            float stackY = 1.002F + (i * 0.003F);
+            float stackY = 1.004F + (i * 0.0055F);
             float slightJitter = ((i % 3) - 1) * 1.5F;
             matrices.translate(0.28F, stackY, 0.50F);
 
@@ -50,6 +53,76 @@ public class GamblingTableBlockEntityRenderer implements BlockEntityRenderer<Gam
             renderFlatCard(matrices, buffer, light, cardW, cardH, false);
             matrices.pop();
         }
+        matrices.pop();
+
+        if(be.getPlayerCard() != null){
+            matrices.push();
+            matrices.translate(0.62F, 1.004F, 0.70F);
+            matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(90.0F));
+            renderTableCard(matrices, vertexConsumers, light, cardW, cardH, be.getPlayerCard());
+            matrices.pop();
+        }
+
+        if(be.getGamblerCard() != null){
+            matrices.push();
+            matrices.translate(0.62F, 1.004F, 0.30F);
+            matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(90.0F));
+            matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(180.0F));
+            renderTableCard(matrices, vertexConsumers, light, cardW, cardH, be.getGamblerCard());
+            matrices.pop();
+        }
+    }
+
+    private void renderTableCard(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, float cardW, float cardH, dev.alphy90.minigames.game.TavernCard card){
+        VertexConsumer buffer = vertexConsumers.getBuffer(RenderLayer.getEntityCutoutNoCull(CARD_TEXTURE));
+        MatrixStack.Entry entry = matrices.peek();
+        Matrix4f pos = entry.getPositionMatrix();
+        float halfW = cardW / 2.0F;
+        float halfH = cardH / 2.0F;
+
+        int r = (card.suit() == CardSuit.SWORD) ? 225 : 70;
+        int g = (card.suit() == CardSuit.SWORD) ? 65 : 130;
+        int b = (card.suit() == CardSuit.SWORD) ? 65 : 185;
+
+        //front face
+        buffer.vertex(pos, -halfW, -halfH, 0.0F).color(r, g, b, 255).texture(0.0F, 1.0F).overlay(OverlayTexture.DEFAULT_UV).light(light).normal(entry, 0.0F, 1.0F, 0.0F);
+        buffer.vertex(pos, halfW, -halfH, 0.0F).color(r, g, b, 255).texture(1.0F, 1.0F).overlay(OverlayTexture.DEFAULT_UV).light(light).normal(entry, 0.0F, 1.0F, 0.0F);
+        buffer.vertex(pos, halfW, halfH, 0.0F).color(r, g, b, 255).texture(1.0F, 0.0F).overlay(OverlayTexture.DEFAULT_UV).light(light).normal(entry, 0.0F, 1.0F, 0.0F);
+        buffer.vertex(pos, -halfW, halfH, 0.0F).color(r, g, b, 255).texture(0.0F, 0.0F).overlay(OverlayTexture.DEFAULT_UV).light(light).normal(entry, 0.0F, 1.0F, 0.0F);
+
+        net.minecraft.client.font.TextRenderer textRenderer = MinecraftClient.getInstance().textRenderer;;
+        String symbol = card.suit().getSymbol();
+        String number = String.valueOf(card.value());
+
+        //middle number
+        matrices.push();
+        matrices.translate(0.0F, 0.0F, 0.002F);
+        float numScale = 0.0070F;
+        matrices.scale(numScale, -numScale, numScale);
+        int numW = textRenderer.getWidth(number);
+        textRenderer.draw(number, -numW / 2.0F, -textRenderer.fontHeight /2.0F, 0xFFFFFFFF, true,
+                matrices.peek().getPositionMatrix(), vertexConsumers, TextRenderer.TextLayerType.POLYGON_OFFSET, 0, light
+        );
+        matrices.pop();
+
+        //top-left suit
+        matrices.push();
+        matrices.translate(-halfW + 0.025F, halfH - 0.025F, 0.002F);
+        float symScale = 0.0035F;
+        matrices.scale(symScale, -symScale, symScale);
+        textRenderer.draw(symbol, 0.0F, 0.0F, 0xFFFFFFFF, true,
+                matrices.peek().getPositionMatrix(), vertexConsumers, TextRenderer.TextLayerType.POLYGON_OFFSET, 0, light
+        );
+        matrices.pop();
+
+        //bottom right
+        matrices.push();
+        matrices.translate(halfW - 0.025F, -halfH + 0.025F, 0.002F);
+        matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(180.0F));
+        matrices.scale(symScale, -symScale, symScale);
+        textRenderer.draw(symbol, 0.0F, 0.0F, 0xFFFFFFFF, true,
+                matrices.peek().getPositionMatrix(), vertexConsumers, TextRenderer.TextLayerType.POLYGON_OFFSET, 0, light
+        );
         matrices.pop();
     }
 
@@ -71,7 +144,7 @@ public class GamblingTableBlockEntityRenderer implements BlockEntityRenderer<Gam
             //pile
             buffer.vertex(pos, halfW, -halfH, 0.0F).color(255, 255, 255, 255).texture(1.0F, 1.0F).overlay(OverlayTexture.DEFAULT_UV).light(light).normal(entry, 0.0F, 1.0F, 0.0F);
             buffer.vertex(pos, -halfW, -halfH, 0.0F).color(255, 255, 255, 255).texture(0.0F, 1.0F).overlay(OverlayTexture.DEFAULT_UV).light(light).normal(entry, 0.0F, 1.0F, 0.0F);
-            buffer.vertex(pos, -halfW, -halfH, 0.0F).color(255, 255, 255, 255).texture(0.0F, 0.0F).overlay(OverlayTexture.DEFAULT_UV).light(light).normal(entry, 0.0F, 1.0F, 0.0F);
+            buffer.vertex(pos, -halfW, halfH, 0.0F).color(255, 255, 255, 255).texture(0.0F, 0.0F).overlay(OverlayTexture.DEFAULT_UV).light(light).normal(entry, 0.0F, 1.0F, 0.0F);
             buffer.vertex(pos, halfW, halfH, 0.0F).color(255, 255, 255, 255).texture(1.0F, 0.0F).overlay(OverlayTexture.DEFAULT_UV).light(light).normal(entry, 0.0F, 1.0F, 0.0F);
         }
         matrices.pop();

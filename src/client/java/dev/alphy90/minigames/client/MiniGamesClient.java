@@ -28,6 +28,7 @@ import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
+import net.minecraft.util.math.Direction;
 import org.lwjgl.glfw.GLFW;
 
 public class MiniGamesClient implements ClientModInitializer {
@@ -184,7 +185,7 @@ public class MiniGamesClient implements ClientModInitializer {
 				}
 			}
 
-			if (CardClientState.isActive() && CardClientState.getCardCount() > 0) {
+			if (CardClientState.isActive() && !CardClientState.isTablePlaying() && CardClientState.getCardCount() > 0) {
 				if (client.player.isSneaking() && client.options.useKey.isPressed()) {
 					if (!shiftRightClickHandled && actionCooldown == 0) {
 						shiftRightClickHandled = true;
@@ -242,6 +243,44 @@ public class MiniGamesClient implements ClientModInitializer {
 				}
 			} else {
 				CardClientState.resetHold();
+			}
+
+			if(CardClientState.isTablePlaying() && CardClientState.isPendingRound() && actionCooldown == 0){
+				if(client.options.useKey.isPressed()){
+					HitResult crosshair = client.crosshairTarget;
+					BlockPos targetTablePos = null;
+
+					if(crosshair != null){
+						if(crosshair.getType() == HitResult.Type.BLOCK && crosshair instanceof BlockHitResult bHit){
+							if(client.world.getBlockState(bHit.getBlockPos()).isOf(MiniGames.GAMBLING_TABLE)){
+								targetTablePos = bHit.getBlockPos();
+							}
+						} else if (crosshair.getType() == HitResult.Type.ENTITY && crosshair instanceof net.minecraft.util.hit.EntityHitResult eHIt) {
+							if(eHIt.getEntity() instanceof dev.alphy90.minigames.entity.GamblerEntity gambler){
+								BlockPos gPos = gambler.hasVehicle() ? gambler.getVehicle().getBlockPos() : gambler.getBlockPos();
+								for(Direction dir : Direction.Type.HORIZONTAL){
+									if(client.world.getBlockState(gPos.offset(dir)).isOf(MiniGames.GAMBLING_TABLE)){
+										targetTablePos = gPos.offset(dir);
+										break;
+									}
+								}
+							}
+						}
+					}
+					if(targetTablePos != null){
+						int selectedSlot = client.player.getInventory().selectedSlot;
+						int cardIndex = CardClientState.getCardIndexForSlot(selectedSlot, CardClientState.getCardCount());
+						if(cardIndex == -1) cardIndex = 0; //fallback to first available
+						dev.alphy90.minigames.game.TavernCard playerCard = CardClientState.getCard(cardIndex);
+						if(playerCard != null){
+							actionCooldown = 15;
+							ClientPlayNetworking.send(new dev.alphy90.minigames.network.PlayTableCardPayLoad(targetTablePos, playerCard.suit().ordinal(), playerCard.value()));
+							CardClientState.removeCardAt(cardIndex);
+							client.player.swingHand(Hand.MAIN_HAND);
+							CardClientState.setPendingRound(false);
+						}
+					}
+				}
 			}
 		});
 	}
