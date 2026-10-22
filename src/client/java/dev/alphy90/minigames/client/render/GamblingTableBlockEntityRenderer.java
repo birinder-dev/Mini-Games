@@ -20,7 +20,8 @@ import net.minecraft.util.math.RotationAxis;
 import org.joml.Matrix4f;
 
 public class GamblingTableBlockEntityRenderer implements BlockEntityRenderer<GamblingTableBlockEntity>{
-    private static final Identifier CARD_TEXTURE = Identifier.of(MiniGames.MOD_ID, "textures/item/tavern_card.png");
+    private static final Identifier CARD_BACK_TEXTURE = Identifier.of(MiniGames.MOD_ID, "textures/item/tavern_card.png");
+    private static final Identifier CARD_FRONT_TEXTURE = Identifier.of(MiniGames.MOD_ID, "textures/item/tavern_card_front.png");
 
     public GamblingTableBlockEntityRenderer(BlockEntityRendererFactory.Context ctx){}
 
@@ -35,7 +36,7 @@ public class GamblingTableBlockEntityRenderer implements BlockEntityRenderer<Gam
         matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(-facing.asRotation()));
         matrices.translate(-0.5, 0.0, -0.5);
 
-        VertexConsumer buffer = vertexConsumers.getBuffer(RenderLayer.getEntityCutoutNoCull(CARD_TEXTURE));
+        VertexConsumer buffer = vertexConsumers.getBuffer(RenderLayer.getEntityCutoutNoCull(CARD_BACK_TEXTURE));
 
         // Card dimensions on table (wider, longer, and thicker deck)
         float cardW = 0.27F;
@@ -74,56 +75,21 @@ public class GamblingTableBlockEntityRenderer implements BlockEntityRenderer<Gam
     }
 
     private void renderTableCard(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, float cardW, float cardH, dev.alphy90.minigames.game.TavernCard card){
-        VertexConsumer buffer = vertexConsumers.getBuffer(RenderLayer.getEntityCutoutNoCull(CARD_TEXTURE));
+        // Front face uses clean white card texture
+        VertexConsumer buffer = vertexConsumers.getBuffer(RenderLayer.getEntityCutoutNoCull(CARD_FRONT_TEXTURE));
         MatrixStack.Entry entry = matrices.peek();
         Matrix4f pos = entry.getPositionMatrix();
         float halfW = cardW / 2.0F;
         float halfH = cardH / 2.0F;
 
-        int r = (card.suit() == CardSuit.SWORD) ? 225 : 70;
-        int g = (card.suit() == CardSuit.SWORD) ? 65 : 130;
-        int b = (card.suit() == CardSuit.SWORD) ? 65 : 185;
+        // Clean white front face
+        buffer.vertex(pos, -halfW, -halfH, 0.0F).color(255, 255, 255, 255).texture(0.0F, 1.0F).overlay(OverlayTexture.DEFAULT_UV).light(light).normal(entry, 0.0F, 1.0F, 0.0F);
+        buffer.vertex(pos, halfW, -halfH, 0.0F).color(255, 255, 255, 255).texture(1.0F, 1.0F).overlay(OverlayTexture.DEFAULT_UV).light(light).normal(entry, 0.0F, 1.0F, 0.0F);
+        buffer.vertex(pos, halfW, halfH, 0.0F).color(255, 255, 255, 255).texture(1.0F, 0.0F).overlay(OverlayTexture.DEFAULT_UV).light(light).normal(entry, 0.0F, 1.0F, 0.0F);
+        buffer.vertex(pos, -halfW, halfH, 0.0F).color(255, 255, 255, 255).texture(0.0F, 0.0F).overlay(OverlayTexture.DEFAULT_UV).light(light).normal(entry, 0.0F, 1.0F, 0.0F);
 
-        //front face
-        buffer.vertex(pos, -halfW, -halfH, 0.0F).color(r, g, b, 255).texture(0.0F, 1.0F).overlay(OverlayTexture.DEFAULT_UV).light(light).normal(entry, 0.0F, 1.0F, 0.0F);
-        buffer.vertex(pos, halfW, -halfH, 0.0F).color(r, g, b, 255).texture(1.0F, 1.0F).overlay(OverlayTexture.DEFAULT_UV).light(light).normal(entry, 0.0F, 1.0F, 0.0F);
-        buffer.vertex(pos, halfW, halfH, 0.0F).color(r, g, b, 255).texture(1.0F, 0.0F).overlay(OverlayTexture.DEFAULT_UV).light(light).normal(entry, 0.0F, 1.0F, 0.0F);
-        buffer.vertex(pos, -halfW, halfH, 0.0F).color(r, g, b, 255).texture(0.0F, 0.0F).overlay(OverlayTexture.DEFAULT_UV).light(light).normal(entry, 0.0F, 1.0F, 0.0F);
-
-        net.minecraft.client.font.TextRenderer textRenderer = MinecraftClient.getInstance().textRenderer;;
-        String symbol = card.suit().getSymbol();
-        String number = String.valueOf(card.value());
-
-        //middle number
-        matrices.push();
-        matrices.translate(0.0F, 0.0F, 0.002F);
-        float numScale = 0.0070F;
-        matrices.scale(numScale, -numScale, numScale);
-        int numW = textRenderer.getWidth(number);
-        textRenderer.draw(number, -numW / 2.0F, -textRenderer.fontHeight /2.0F, 0xFFFFFFFF, true,
-                matrices.peek().getPositionMatrix(), vertexConsumers, TextRenderer.TextLayerType.POLYGON_OFFSET, 0, light
-        );
-        matrices.pop();
-
-        //top-left suit
-        matrices.push();
-        matrices.translate(-halfW + 0.025F, halfH - 0.025F, 0.002F);
-        float symScale = 0.0035F;
-        matrices.scale(symScale, -symScale, symScale);
-        textRenderer.draw(symbol, 0.0F, 0.0F, 0xFFFFFFFF, true,
-                matrices.peek().getPositionMatrix(), vertexConsumers, TextRenderer.TextLayerType.POLYGON_OFFSET, 0, light
-        );
-        matrices.pop();
-
-        //bottom right
-        matrices.push();
-        matrices.translate(halfW - 0.025F, -halfH + 0.025F, 0.002F);
-        matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(180.0F));
-        matrices.scale(symScale, -symScale, symScale);
-        textRenderer.draw(symbol, 0.0F, 0.0F, 0xFFFFFFFF, true,
-                matrices.peek().getPositionMatrix(), vertexConsumers, TextRenderer.TextLayerType.POLYGON_OFFSET, 0, light
-        );
-        matrices.pop();
+        // Front details: corner numbers and counted pips in middle
+        CardRenderHelper.renderCardFrontDetails(matrices, vertexConsumers, light, cardW, cardH, 0.0F, card);
     }
 
     private void renderFlatCard(MatrixStack matrices, VertexConsumer buffer, int light, float cardW, float cardH, boolean faceUp){

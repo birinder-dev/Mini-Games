@@ -19,9 +19,44 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 
+import net.minecraft.entity.data.DataTracker;
+import net.minecraft.entity.data.TrackedData;
+import net.minecraft.entity.data.TrackedDataHandlerRegistry;
+import net.minecraft.nbt.NbtCompound;
+
 public class GamblerEntity extends PathAwareEntity {
     public GamblerEntity(EntityType<? extends PathAwareEntity> entityType, World world) {
         super(entityType, world);
+    }
+
+    private static final TrackedData<Integer> LEFT_CARDS = DataTracker.registerData(GamblerEntity.class, TrackedDataHandlerRegistry.INTEGER);
+
+    @Override
+    protected void initDataTracker(DataTracker.Builder builder){
+        super.initDataTracker(builder);
+        builder.add(LEFT_CARDS, 5);
+    }
+
+    public int getLeftCards(){
+        return this.dataTracker.get(LEFT_CARDS);
+    }
+
+    public void setLeftCards(int count){
+        this.dataTracker.set(LEFT_CARDS, Math.max(0, count));
+    }
+
+    @Override
+    public void writeCustomDataToNbt(NbtCompound nbt){
+        super.writeCustomDataToNbt(nbt);
+        nbt.putInt("LeftCards", this.getLeftCards());
+    }
+
+    @Override
+    public void readCustomDataFromNbt(NbtCompound nbt){
+        super.readCustomDataFromNbt(nbt);
+        if(nbt.contains("LeftCards")){
+            this.setLeftCards(nbt.getInt("LeftCards"));
+        }
     }
 
     public static DefaultAttributeContainer.Builder createGamblerAttributes() {

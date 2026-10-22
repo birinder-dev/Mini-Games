@@ -32,7 +32,10 @@ public abstract class HeldItemRendererMixin {
     protected abstract void renderArm(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, Arm arm);
 
     @Unique
-    private static final Identifier CARD_TEXTURE = Identifier.of(MiniGames.MOD_ID, "textures/item/tavern_card.png");
+    private static final Identifier CARD_BACK_TEXTURE = Identifier.of(MiniGames.MOD_ID, "textures/item/tavern_card.png");
+
+    @Unique
+    private static final Identifier CARD_FRONT_TEXTURE = Identifier.of(MiniGames.MOD_ID, "textures/item/tavern_card_front.png");
 
     @Inject(method = "renderItem(FLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider$Immediate;Lnet/minecraft/client/network/ClientPlayerEntity;I)V", at = @At("HEAD"), cancellable = true)
     private void renderHandheldCards(float tickDelta, MatrixStack matrices, VertexConsumerProvider.Immediate vertexConsumers, ClientPlayerEntity player, int light, CallbackInfo ci) {
@@ -185,72 +188,26 @@ public abstract class HeldItemRendererMixin {
     }
 
     @Unique
-    private void renderCardQuad(MatrixStack matrices, VertexConsumerProvider vertexConsumer, int light, float cardW, float cardH, TavernCard card,  boolean isSelected) {
-        VertexConsumer buffer = vertexConsumer.getBuffer(RenderLayer.getEntityCutoutNoCull(CARD_TEXTURE));
+    private void renderCardQuad(MatrixStack matrices, VertexConsumerProvider vertexConsumer, int light, float cardW, float cardH, TavernCard card, boolean isSelected) {
         MatrixStack.Entry entry = matrices.peek();
         Matrix4f pos = entry.getPositionMatrix();
         float halfW = cardW / 2.0F;
 
-        int r = 240;
-        int g = 240;
-        int b = 240;
-        if(card != null){
-            if(card.suit() == CardSuit.SWORD){
-                r = isSelected ? 255 : 255;
-                g = isSelected ? 90 : 65;
-                b = isSelected ? 90 : 65;
-            } else {
-                r = isSelected ? 90 : 70;
-                g = isSelected ? 160 : 130;
-                b = isSelected ? 220 : 185;
-            }
-        }
+        // 1. FRONT FACE (Facing the player in 1st person) - Clean white card canvas
+        VertexConsumer frontBuffer = vertexConsumer.getBuffer(RenderLayer.getEntityCutoutNoCull(CARD_FRONT_TEXTURE));
+        frontBuffer.vertex(pos, -halfW, 0.0F, 0.0F).color(255, 255, 255, 255).texture(0.0F, 1.0F).overlay(OverlayTexture.DEFAULT_UV).light(light).normal(entry, 0.0F, 0.0F, 1.0F);
+        frontBuffer.vertex(pos, halfW, 0.0F, 0.0F).color(255, 255, 255, 255).texture(1.0F, 1.0F).overlay(OverlayTexture.DEFAULT_UV).light(light).normal(entry, 0.0F, 0.0F, 1.0F);
+        frontBuffer.vertex(pos, halfW, cardH, 0.0F).color(255, 255, 255, 255).texture(1.0F, 0.0F).overlay(OverlayTexture.DEFAULT_UV).light(light).normal(entry, 0.0F, 0.0F, 1.0F);
+        frontBuffer.vertex(pos, -halfW, cardH, 0.0F).color(255, 255, 255, 255).texture(0.0F, 0.0F).overlay(OverlayTexture.DEFAULT_UV).light(light).normal(entry, 0.0F, 0.0F, 1.0F);
 
-        // Front face (facing camera)
-        buffer.vertex(pos, -halfW, 0.0F, 0.0F).color(r, g, b, 255).texture(0.0F, 1.0F).overlay(OverlayTexture.DEFAULT_UV).light(light).normal(entry, 0.0F, 0.0F, 1.0F);
-        buffer.vertex(pos, halfW, 0.0F, 0.0F).color(r, g, b, 255).texture(1.0F, 1.0F).overlay(OverlayTexture.DEFAULT_UV).light(light).normal(entry, 0.0F, 0.0F, 1.0F);
-        buffer.vertex(pos, halfW, cardH, 0.0F).color(r, g, b, 255).texture(1.0F, 0.0F).overlay(OverlayTexture.DEFAULT_UV).light(light).normal(entry, 0.0F, 0.0F, 1.0F);
-        buffer.vertex(pos, -halfW, cardH, 0.0F).color(r, g, b, 255).texture(0.0F, 0.0F).overlay(OverlayTexture.DEFAULT_UV).light(light).normal(entry, 0.0F, 0.0F, 1.0F);
+        // 2. BACK FACE (Facing away from player) - Premade ornate back texture
+        VertexConsumer backBuffer = vertexConsumer.getBuffer(RenderLayer.getEntityCutoutNoCull(CARD_BACK_TEXTURE));
+        backBuffer.vertex(pos, halfW, 0.0F, -0.001F).color(255, 255, 255, 255).texture(1.0F, 1.0F).overlay(OverlayTexture.DEFAULT_UV).light(light).normal(entry, 0.0F, 0.0F, -1.0F);
+        backBuffer.vertex(pos, -halfW, 0.0F, -0.001F).color(255, 255, 255, 255).texture(0.0F, 1.0F).overlay(OverlayTexture.DEFAULT_UV).light(light).normal(entry, 0.0F, 0.0F, -1.0F);
+        backBuffer.vertex(pos, -halfW, cardH, -0.001F).color(255, 255, 255, 255).texture(0.0F, 0.0F).overlay(OverlayTexture.DEFAULT_UV).light(light).normal(entry, 0.0F, 0.0F, -1.0F);
+        backBuffer.vertex(pos, halfW, cardH, -0.001F).color(255, 255, 255, 255).texture(1.0F, 0.0F).overlay(OverlayTexture.DEFAULT_UV).light(light).normal(entry, 0.0F, 0.0F, -1.0F);
 
-        // Back face
-        buffer.vertex(pos, halfW, 0.0F, -0.001F).color(230, 230, 230, 255).texture(1.0F, 1.0F).overlay(OverlayTexture.DEFAULT_UV).light(light).normal(entry, 0.0F, 0.0F, -1.0F);
-        buffer.vertex(pos, -halfW, 0.0F, -0.001F).color(230, 230, 230, 255).texture(0.0F, 1.0F).overlay(OverlayTexture.DEFAULT_UV).light(light).normal(entry, 0.0F, 0.0F, -1.0F);
-        buffer.vertex(pos, -halfW, cardH, -0.001F).color(230, 230, 230, 255).texture(0.0F, 0.0F).overlay(OverlayTexture.DEFAULT_UV).light(light).normal(entry, 0.0F, 0.0F, -1.0F);
-        buffer.vertex(pos, halfW, cardH, -0.001F).color(230, 230, 230, 255).texture(1.0F, 0.0F).overlay(OverlayTexture.DEFAULT_UV).light(light).normal(entry, 0.0F, 0.0F, -1.0F);
-
-        if(card != null){
-            net.minecraft.client.font.TextRenderer textRenderer = MinecraftClient.getInstance().textRenderer;
-            String symbol = card.suit().getSymbol();
-            String number = String.valueOf(card.value());
-
-
-            //number in centre
-            matrices.push();
-            matrices.translate(0.0F, cardH * 0.50F, 0.002F);
-            float numScale = 0.0085F;
-            matrices.scale(numScale, -numScale, numScale);
-            int numW = textRenderer.getWidth(number);
-            textRenderer.draw(number, -numW / 2.0F, -textRenderer.fontHeight / 2.0F, 0xFFFFFFFF, true,
-                    matrices.peek().getPositionMatrix(), vertexConsumer, TextRenderer.TextLayerType.POLYGON_OFFSET, 0, light);
-            matrices.pop();
-
-            //top left corner
-            matrices.push();
-            matrices.translate(-halfW + 0.032F, cardH - 0.035F, 0.002F);
-            float symScale = 0.0040F;
-            matrices.scale(symScale, -symScale, symScale);
-            textRenderer.draw(symbol, 0.0F, 0.0F, 0xFFFFFFFF, true,
-                    matrices.peek().getPositionMatrix(), vertexConsumer, TextRenderer.TextLayerType.POLYGON_OFFSET, 0, light);
-            matrices.pop();
-
-            //bottom right
-            matrices.push();
-            matrices.translate(halfW - 0.032F, 0.035F, 0.002F);
-            matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(180.0F));
-            matrices.scale(symScale, -symScale, symScale);
-            textRenderer.draw(symbol, 0.0F, 0.0F, 0xFFFFFFFF, true,
-                    matrices.peek().getPositionMatrix(), vertexConsumer, TextRenderer.TextLayerType.POLYGON_OFFSET, 0, light);
-            matrices.pop();
-        }
+        // 3. FRONT DETAILS (Corners numbers and counted middle pips)
+        dev.alphy90.minigames.client.render.CardRenderHelper.renderCardFrontDetails(matrices, vertexConsumer, light, cardW, cardH, cardH / 2.0F, card);
     }
 }

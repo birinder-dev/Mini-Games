@@ -20,6 +20,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
+import net.minecraft.world.BlockLocating;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
@@ -37,6 +38,17 @@ public class GamblingTableBlock extends BlockWithEntity{
     private static final VoxelShape LEG_SE = Block.createCuboidShape(12.5, 0.0, 12.5, 15.0, 13.0, 15.0);
     private static final VoxelShape SHAPE = VoxelShapes.union(TABLETOP, LEG_NW, LEG_NE, LEG_SW, LEG_SE);
 
+    //deck pile hitbox
+    private static final VoxelShape DECK_NORTH = Block.createCuboidShape(2.0, 16.0, 4.5, 7.0, 17.5, 11.5);
+    private static final VoxelShape DECK_SOUTH = Block.createCuboidShape(9.0, 16.0, 4.5, 14.0, 17.5, 11.5);
+    private static final VoxelShape DECK_EAST = Block.createCuboidShape(4.5, 16.0, 2.0, 11.5, 17.5, 7.0);
+    private static final VoxelShape DECK_WEST = Block.createCuboidShape(4.5, 16.0, 9.0, 11.5, 17.5, 14.0);
+
+    private static final VoxelShape SHAPE_NORTH = VoxelShapes.union(SHAPE, DECK_NORTH);
+    private static final VoxelShape SHAPE_SOUTH = VoxelShapes.union(SHAPE, DECK_SOUTH);
+    private static final VoxelShape SHAPE_EAST = VoxelShapes.union(SHAPE, DECK_EAST);
+    private static final VoxelShape SHAPE_WEST = VoxelShapes.union(SHAPE, DECK_WEST);
+
     public GamblingTableBlock(Settings settings){
         super(settings);
         this.setDefaultState(this.stateManager.getDefaultState().with(FACING, Direction.NORTH));
@@ -49,6 +61,19 @@ public class GamblingTableBlock extends BlockWithEntity{
 
     @Override
     public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context){
+        if(world.getBlockEntity(pos) instanceof GamblingTableBlockEntity be && be.isHasCards()){
+            return switch (state.get(FACING)){
+                case SOUTH -> SHAPE_SOUTH;
+                case EAST -> SHAPE_EAST;
+                case WEST -> SHAPE_WEST;
+                default -> SHAPE_NORTH;
+            };
+        }
+        return SHAPE;
+    }
+
+    @Override
+    public VoxelShape getCollisionShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context){
         return SHAPE;
     }
 
