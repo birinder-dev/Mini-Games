@@ -115,4 +115,11 @@ public class GamblerEntity extends PathAwareEntity {
         return super.interactMob(player, hand);
     }
 
+    @Override
+    public net.minecraft.util.math.Vec3d getVehicleAttachmentPos(net.minecraft.entity.Entity vehicle) {
+        if (vehicle instanceof SeatEntity) {
+            return new net.minecraft.util.math.Vec3d(0.0, 0.6, 0.0);
+        }
+        return super.getVehicleAttachmentPos(vehicle);
+    }
 }

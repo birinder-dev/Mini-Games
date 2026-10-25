@@ -78,7 +78,11 @@ public class MiniGames implements ModInitializer {
 	public static final EntityType<GamblerEntity> GAMBLER = Registry.register(
 			Registries.ENTITY_TYPE,
 			id("gambler"),
-			EntityType.Builder.create(GamblerEntity::new, SpawnGroup.CREATURE).dimensions(0.6F, 1.95F).build());
+			EntityType.Builder.create(GamblerEntity::new, SpawnGroup.CREATURE)
+					.dimensions(0.6F, 1.95F)
+					.eyeHeight(1.62F)
+					.vehicleAttachment(0.6F)
+					.build());
 
 	public static final EntityType<SeatEntity> SEAT_ENTITY = Registry.register(
 			Registries.ENTITY_TYPE,

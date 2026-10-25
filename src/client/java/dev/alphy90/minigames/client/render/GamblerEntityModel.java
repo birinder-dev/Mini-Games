@@ -12,7 +12,7 @@ public class GamblerEntityModel extends VillagerResemblingModel<GamblerEntity>{
 
     public GamblerEntityModel(ModelPart root){
         super(root);
-        this.jacket = root.getChild("jacket");
+        this.jacket = root.getChild("body").getChild("jacket");
         this.rightLeg = root.getChild("right_leg");
         this.leftLeg = root.getChild("left_leg");
         this.arms = root.getChild("arms");
@@ -35,17 +35,18 @@ public class GamblerEntityModel extends VillagerResemblingModel<GamblerEntity>{
 
             this.leftLeg.pitch = -1.4137167F;
             this.leftLeg.yaw = -((float) Math.PI / 10.0F);
-            this.leftLeg.roll = 0.07853982F;
+            this.leftLeg.roll = -0.07853982F;
 
             this.arms.pitch = -0.75F;
         } else {
             this.jacket.visible = true;
+            this.arms.pitch = 0.0F;
             this.rightLeg.yaw = 0.0F;
             this.rightLeg.roll = 0.0F;
             this.leftLeg.yaw = 0.0F;
             this.leftLeg.roll = 0.0F;
             this.rightLeg.pivotY = 12.0F;
-            this.leftLeg.pivotY =12.0F;
+            this.leftLeg.pivotY = 12.0F;
             this.rightLeg.pivotZ = 0.0F;
             this.leftLeg.pivotZ = 0.0F;
         }

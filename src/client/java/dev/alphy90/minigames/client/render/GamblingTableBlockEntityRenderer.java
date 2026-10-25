@@ -48,17 +48,16 @@ public class GamblingTableBlockEntityRenderer implements BlockEntityRenderer<Gam
             matrices.push();
             float stackY = 1.004F + (i * 0.0055F);
             float slightJitter = ((i % 3) - 1) * 1.5F;
-            matrices.translate(0.28F, stackY, 0.50F);
+            matrices.translate(0.72F, stackY, 0.50F);
 
             matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(slightJitter));
             renderFlatCard(matrices, buffer, light, cardW, cardH, false);
             matrices.pop();
         }
-        matrices.pop();
 
         if(be.getPlayerCard() != null){
             matrices.push();
-            matrices.translate(0.62F, 1.004F, 0.70F);
+            matrices.translate(0.38F, 1.004F, 0.65F);
             matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(90.0F));
             renderTableCard(matrices, vertexConsumers, light, cardW, cardH, be.getPlayerCard());
             matrices.pop();
@@ -66,12 +65,13 @@ public class GamblingTableBlockEntityRenderer implements BlockEntityRenderer<Gam
 
         if(be.getGamblerCard() != null){
             matrices.push();
-            matrices.translate(0.62F, 1.004F, 0.30F);
+            matrices.translate(0.38F, 1.004F, 0.35F);
             matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(90.0F));
             matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(180.0F));
             renderTableCard(matrices, vertexConsumers, light, cardW, cardH, be.getGamblerCard());
             matrices.pop();
         }
+        matrices.pop();
     }
 
     private void renderTableCard(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, float cardW, float cardH, dev.alphy90.minigames.game.TavernCard card){

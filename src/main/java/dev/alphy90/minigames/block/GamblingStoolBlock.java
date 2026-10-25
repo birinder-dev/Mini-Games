@@ -36,6 +36,13 @@ public class GamblingStoolBlock extends Block{
     protected ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit){
         if(!world.isClient()){
             Box stoolBox = new Box(pos).expand(0.2);
+
+            for(SeatEntity seat : world.getEntitiesByClass(SeatEntity.class, stoolBox, SeatEntity::hasPassengers)){
+                if(seat.getFirstPassenger() instanceof GamblerEntity gambler){
+                    gambler.dismountVehicle();
+                    return ActionResult.SUCCESS;
+                }
+            }
             boolean occupied = !world.getEntitiesByClass(SeatEntity.class, stoolBox, SeatEntity::hasPassengers).isEmpty();
             if(occupied){
                 return ActionResult.CONSUME;
@@ -50,6 +57,18 @@ public class GamblingStoolBlock extends Block{
             checkTableAndOpponent(world, pos, (ServerPlayerEntity) player);
         }
         return ActionResult.SUCCESS;
+    }
+
+    @Override
+    protected void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved){
+        if(!state.isOf(newState.getBlock())){
+            Box stoolBox = new Box(pos).expand(0.2);
+            for(SeatEntity seat : world.getEntitiesByClass(SeatEntity.class, stoolBox, net.minecraft.entity.Entity::isAlive)){
+                seat.removeAllPassengers();
+                seat.discard();
+            }
+        }
+        super.onStateReplaced(state, world, pos, newState, moved);
     }
 
     private void checkTableAndOpponent(World world, BlockPos stoolPos, ServerPlayerEntity player){

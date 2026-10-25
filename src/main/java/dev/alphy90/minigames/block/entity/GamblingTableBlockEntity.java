@@ -74,6 +74,10 @@ public class GamblingTableBlockEntity extends BlockEntity{
                 Box box = new Box(stoolPos).expand(0.2);
                 for (SeatEntity seat : world.getEntitiesByClass(SeatEntity.class, box, SeatEntity::hasPassengers)){
                     if(seat.getFirstPassenger() instanceof GamblerEntity){
+                        Direction playerFacing = dir.getOpposite();
+                        if(this.getCachedState().get(dev.alphy90.minigames.block.GamblingTableBlock.FACING) != playerFacing){
+                            world.setBlockState(tablePos, this.getCachedState().with(dev.alphy90.minigames.block.GamblingTableBlock.FACING, playerFacing));
+                        }
                         return true;
                     }
                 }
@@ -98,7 +102,7 @@ public class GamblingTableBlockEntity extends BlockEntity{
             return ActionResult.SUCCESS;
         }
 
-        if(this.hasCards && this.pileCount > 0){
+        if(this.hasCards && this.pileCount > 0 && hit.getPos().y > this.pos.getY() + 1.0){
             this.pileCount--;
             player.giveItemStack(new net.minecraft.item.ItemStack(MiniGames.TAVERN_CARD));
             this.world.playSound(null, this.pos, SoundEvents.ENTITY_ITEM_PICKUP, SoundCategory.PLAYERS, 0.6F, 1.2F);

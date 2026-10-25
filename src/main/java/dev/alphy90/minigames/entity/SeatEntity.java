@@ -25,7 +25,8 @@ public class SeatEntity extends Entity{
     public void tick(){
         super.tick();
         if(!this.getWorld().isClient()){
-            if(this.getPassengerList().isEmpty()){
+            if(this.getPassengerList().isEmpty() || !(this.getWorld().getBlockState(this.getBlockPos()).getBlock() instanceof dev.alphy90.minigames.block.GamblingStoolBlock)){
+                this.removeAllPassengers();
                 this.discard();
             }
         }

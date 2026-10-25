@@ -68,6 +68,16 @@ public class GamblerSeekStoolGoal extends Goal {
             World world = this.gambler.getWorld();
             if(!world.isClient()){
                 SeatEntity seat = new SeatEntity(world, targetStoolPos, 0.45);
+                for(net.minecraft.util.math.Direction dir : net.minecraft.util.math.Direction.Type.HORIZONTAL){
+                    if(world.getBlockState(targetStoolPos.offset(dir)).getBlock() instanceof dev.alphy90.minigames.block.GamblingTableBlock){
+                        float yaw = dir.asRotation();
+                        this.gambler.setYaw(yaw);
+                        this.gambler.setBodyYaw(yaw);
+                        this.gambler.setHeadYaw(yaw);
+                        seat.setYaw(yaw);
+                        break;
+                    }
+                }
                 world.spawnEntity(seat);
                 this.gambler.startRiding(seat, true);
             }
