@@ -17,9 +17,6 @@ public class CardClientState {
     private static boolean throwCharging = false;
 
     public static boolean isActive(){
-        if(tablePlaying && handCards.isEmpty()){
-            setCardCount(cardCount > 0 ? cardCount : 5);
-        }
         return active;
     }
 
@@ -187,12 +184,6 @@ public class CardClientState {
 
     public static void setTablePlaying(boolean playing){
         tablePlaying = playing;
-        if(tablePlaying){
-            pendingRound = true;
-            if(handCards.isEmpty()){
-                setCardCount(cardCount > 0 ? cardCount : 5);
-            }
-        }
     }
 
     public static boolean isPendingRound(){

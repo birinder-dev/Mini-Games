@@ -23,6 +23,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.item.*;
 import net.minecraft.network.RegistryByteBuf;
+import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
@@ -175,6 +176,7 @@ public class MiniGames implements ModInitializer {
 		PayloadTypeRegistry.playS2C().register(CardStateS2CPayload.ID, CardStateS2CPayload.CODEC);
 
 		PayloadTypeRegistry.playS2C().register(TablePlayingPayload.ID, TablePlayingPayload.CODEC);
+		PayloadTypeRegistry.playS2C().register(OpenTableScreenPayload.ID, OpenTableScreenPayload.CODEC);
 
 		ServerPlayNetworking.registerGlobalReceiver(CardStateC2SPayload.ID, ((payload, context) -> {
 			ServerPlayerEntity sender = context.player();

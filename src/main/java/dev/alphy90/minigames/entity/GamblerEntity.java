@@ -103,8 +103,8 @@ public class GamblerEntity extends PathAwareEntity {
                 for(net.minecraft.util.math.Direction dir : Direction.Type.HORIZONTAL){
                     BlockPos tablePos = stoolPos.offset(dir);
                     if(this.getWorld().getBlockEntity(tablePos) instanceof dev.alphy90.minigames.block.entity.GamblingTableBlockEntity tableBe){
-                        if(tableBe.areGameConditionsMet((net.minecraft.server.world.ServerWorld)this.getWorld(), serverPlayer)){
-                            net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(serverPlayer, new dev.alphy90.minigames.network.TablePlayingPayload(true));
+                        if(tableBe.areGameConditionsMet((net.minecraft.server.world.ServerWorld)this.getWorld(), serverPlayer) && !tableBe.isGameActive()){
+                            net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(serverPlayer, new dev.alphy90.minigames.network.OpenTableScreenPayload(tablePos));
                             return ActionResult.SUCCESS;
                         }
                     }

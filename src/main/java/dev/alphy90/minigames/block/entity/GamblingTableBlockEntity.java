@@ -36,14 +36,8 @@ public class GamblingTableBlockEntity extends BlockEntity{
     public dev.alphy90.minigames.game.TavernCard getGamblerCard() { return gamblerCard; }
 
     public void playPlayerCard(dev.alphy90.minigames.game.TavernCard card, ServerPlayerEntity player){
-        this.playerCard = card;
-        this.gamblerCard = dev.alphy90.minigames.game.CardDeck.randomCard();
-
-        if(this.world != null){
-            this.world.playSound(null, this.pos, SoundEvents.BLOCK_WOOL_PLACE, SoundCategory.BLOCKS, 0.8F, 1.2F);
-            this.markDirty();
-            this.world.updateListeners(this.pos, this.getCachedState(), this.getCachedState(), 3);
-        }
+        this.playerCard = null;
+        this.gamblerCard = null;
     }
 
     public GamblingTableBlockEntity(BlockPos pos, BlockState state){
@@ -98,7 +92,9 @@ public class GamblingTableBlockEntity extends BlockEntity{
                 this.markDirty();
                 this.world.updateListeners(this.pos, this.getCachedState(), this.getCachedState(), 3);
             }
-            net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(player, new dev.alphy90.minigames.network.TablePlayingPayload(true));
+            if(!this.gameActive){
+                net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(player, new dev.alphy90.minigames.network.OpenTableScreenPayload(this.pos));
+            }
             return ActionResult.SUCCESS;
         }
 
@@ -203,5 +199,16 @@ public class GamblingTableBlockEntity extends BlockEntity{
     @Override
     public NbtCompound toInitialChunkDataNbt(RegistryWrapper.WrapperLookup registries){
         return createNbt(registries);
+    }
+
+    private boolean gameActive = false;
+
+    public boolean isGameActive(){
+        return this.gameActive;
+    }
+
+    public void setGameActive(boolean active){
+        this.gameActive = active;
+        this.markDirty();
     }
 }

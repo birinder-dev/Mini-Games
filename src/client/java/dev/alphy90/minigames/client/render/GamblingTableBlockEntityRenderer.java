@@ -54,23 +54,6 @@ public class GamblingTableBlockEntityRenderer implements BlockEntityRenderer<Gam
             renderFlatCard(matrices, buffer, light, cardW, cardH, false);
             matrices.pop();
         }
-
-        if(be.getPlayerCard() != null){
-            matrices.push();
-            matrices.translate(0.38F, 1.004F, 0.65F);
-            matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(90.0F));
-            renderTableCard(matrices, vertexConsumers, light, cardW, cardH, be.getPlayerCard());
-            matrices.pop();
-        }
-
-        if(be.getGamblerCard() != null){
-            matrices.push();
-            matrices.translate(0.38F, 1.004F, 0.35F);
-            matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(90.0F));
-            matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(180.0F));
-            renderTableCard(matrices, vertexConsumers, light, cardW, cardH, be.getGamblerCard());
-            matrices.pop();
-        }
         matrices.pop();
     }
 

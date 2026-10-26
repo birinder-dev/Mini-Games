@@ -91,7 +91,6 @@ public class GamblingStoolBlock extends Block{
 
             if(gamblerDirectlyOpposite){
                 player.sendMessage(Text.literal("You sit across from the Gambler. Ready to play").formatted(Formatting.GREEN), true);
-                ServerPlayNetworking.send(player, new TablePlayingPayload(true));
                 return;
             }
 
@@ -107,13 +106,11 @@ public class GamblingStoolBlock extends Block{
 
             if(gamblerSeatedElsewhereAtTable){
                 player.sendMessage(Text.literal("You must sit on the stool directly in front of the Gambler across the table to play!").formatted(Formatting.RED), true);
-                ServerPlayNetworking.send(player, new TablePlayingPayload(false));
                 return;
             }
 
             //gambler not at table
             player.sendMessage(Text.literal("Waiting for the Gambler to sit across the table...").formatted(Formatting.YELLOW), true);
-            ServerPlayNetworking.send(player, new TablePlayingPayload(false));
             return;
         }
 
@@ -122,7 +119,6 @@ public class GamblingStoolBlock extends Block{
         if(diagonalTablePos != null && hasAnyGamblerAtTable(world, diagonalTablePos)){
             player.sendMessage(Text.literal("You must sit on the stool directly in front of the Gambler across the table!").formatted(Formatting.RED), true);
         }
-        ServerPlayNetworking.send(player, new TablePlayingPayload(false));
     }
 
     private boolean isGamblerSeatedAt(World world, BlockPos pos){
