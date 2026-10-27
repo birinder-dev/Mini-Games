@@ -2,21 +2,23 @@ package dev.alphy90.minigames.client.gui;
 
 import dev.alphy90.minigames.MiniGames;
 
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.sound.PositionedSoundInstance;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.util.math.RotationAxis;
 
 public class GamblingTableScreen extends Screen{
     private static final Identifier BG_TEXTURE = Identifier.of(MiniGames.MOD_ID, "textures/gui/bg_table_texture_main.png");
     private static final Identifier EMERALD_TEXTURE = Identifier.of(MiniGames.MOD_ID, "textures/gui/emerald_block.png");
+    private static final Identifier CARD_BACK_TEXTURE = Identifier.of(MiniGames.MOD_ID, "textures/item/tavern_card.png");
     private static final String[] TAB_NAMES = {"Section 1", "Section 2", "Advanced"};
     private static final String[] DIFFICULTIES = {"Medium", "Easy", "Hard"};
 
@@ -36,6 +38,14 @@ public class GamblingTableScreen extends Screen{
     private int minBet = 2;
     private int maxBet = 30;
     private boolean isDraggingMeter = false;
+
+    //cards value
+    private int cardCount = 5;
+    private final int minCards = 1;
+    private final int maxCards = 9;
+    private ButtonWidget backCardButton;
+    private ButtonWidget nextCardButton;
+    private ButtonWidget playButton;
 
     //tabs
     private int tabWidth = 92;
@@ -62,6 +72,7 @@ public class GamblingTableScreen extends Screen{
         int contentX = this.left + 16;
         int contentY = tabY + this.tabHeight + 10;
         int contentWidth = this.bgWidth - 32;
+        int contentHeight = (this.top + this.bgHeight - 16) - contentY;
 
         int btnWidth = 100;
         int btnHeight = 20;
@@ -79,14 +90,69 @@ public class GamblingTableScreen extends Screen{
                 .build();
 
         this.addDrawableChild(this.difficultyButton);
+
+        // card area
+        int rightStartX = contentX + (int)(contentWidth * 0.40f);
+        int rightWidth = contentWidth - (int)(contentWidth * 0.40f);
+        int rightCenterX = rightStartX + (rightWidth / 2);
+        int playButtonY = contentY + contentHeight - 38;
+        int playButtonWidth = 96;
+        int arrowY = playButtonY - 26;
+
+        this.backCardButton = ButtonWidget.builder(
+                Text.literal("<"),
+                btn -> {
+                    if(this.cardCount > this.minCards){
+                        this.cardCount--;
+                        updateWidgetVisibility();
+                    }
+                }
+        ).dimensions(rightCenterX - 48, arrowY, 20, 20).build();
+
+        this.nextCardButton = ButtonWidget.builder(
+                Text.literal(">"),
+                btn -> {
+                    if(this.cardCount < this.maxCards) {
+                        this.cardCount++;
+                        updateWidgetVisibility();
+                    }
+                }
+        ).dimensions(rightCenterX + 28, arrowY, 20, 20).build();
+
+        this.playButton = ButtonWidget.builder(
+                Text.literal("Start Play!"),
+                btn -> {
+                    if(this.client != null && this.client.player != null){
+                        this.client.player.sendMessage(Text.literal("Playing with " + this.cardCount + " cards and " + this.currentBet + " emeralds"), true);
+                    }
+                }
+        ).dimensions(rightCenterX - (playButtonWidth / 2), playButtonY, playButtonWidth, 20).build();
+        this.addDrawableChild(this.backCardButton);
+        this.addDrawableChild(this.nextCardButton);
+        this.addDrawableChild(this.playButton);
+
         updateWidgetVisibility();
     }
 
     private void updateWidgetVisibility(){
-        boolean isAdvanced = (this.selectedSection == 2);
+        boolean settingTab = (this.selectedSection == 2);
         if(this.difficultyButton != null){
-            this.difficultyButton.visible = isAdvanced;
-            this.difficultyButton.active = isAdvanced;
+            this.difficultyButton.visible = settingTab;
+            this.difficultyButton.active = settingTab;
+        }
+
+        boolean gameTab = (this.selectedSection == 0);
+        if(this.backCardButton != null){
+            this.backCardButton.visible = gameTab;
+            this.backCardButton.active = gameTab && (this.cardCount > this.minCards);
+        }
+        if(this.nextCardButton != null){
+            this.nextCardButton.visible = gameTab;
+            this.nextCardButton.active = gameTab && (this.cardCount < this.maxCards);
+        }
+        if(this.playButton != null){
+            this.playButton.visible = gameTab;
+            this.playButton.active = gameTab;
         }
     }
 
@@ -148,7 +214,105 @@ public class GamblingTableScreen extends Screen{
             //label
             int rowY = contentY + 16;
             context.drawTextWithShadow(this.textRenderer, Text.literal("Difficulty"), contentX + 16, rowY + 6, 0xFFFFFFFF);
-        }else {
+        } else if(this.selectedSection == 0){
+            //section 0
+            //left meter
+            int leftWidth = (int)(contentWidth * 0.40f);
+            int leftCenterX = contentX + (leftWidth / 2);
+            int barX = leftCenterX - 6;
+            int barWidth = 12;
+            int barTopY = contentY + 14;
+            int barHeight = 84;
+            int barBottomY = barTopY + barHeight;
+
+            //top cap
+            context.fill(barX - 8, barTopY, barX + 8 + barWidth, barTopY + 2, 0xFFE5B834);
+            context.fill(barX - 8, barTopY, barX + 8 + barWidth, barTopY + 1, 0xFFFFF19E);
+            context.drawTextWithShadow(this.textRenderer, Text.literal("pay"), barX - 28, barTopY - 3, 0xFFCCCCCC);
+            context.drawTextWithShadow(this.textRenderer, Text.literal(String.valueOf(this.maxBet)), barX + barWidth + 10, barTopY - 3, 0xFFE5B834);
+
+            //bottom cap
+            context.fill(barX - 8, barBottomY - 2, barX + barWidth + 8, barBottomY, 0xFFE5B834);
+            context.fill(barX - 8, barBottomY - 1, barX + barWidth + 8, barBottomY, 0xFF8A6510);
+            context.drawTextWithShadow(this.textRenderer, Text.literal("get"), barX - 28, barBottomY - 6, 0xFFCCCCCC);
+            context.drawTextWithShadow(this.textRenderer, Text.literal(String.valueOf(this.minBet)), barX + barWidth + 10, barBottomY - 6, 0xFFE5B834);
+
+            //vertical golden outer rails
+            context.fill(barX, barTopY, barX + 1, barBottomY, 0xFFE5B834);
+            context.fill(barX + barWidth - 1, barTopY, barX + barWidth, barBottomY, 0xFFE5B834);
+
+            //background track
+            context.fill(barX + 1, barTopY + 2, barX + barWidth - 1, barBottomY - 2, 0xFF2A2D32);
+            context.fill(barX + 2, barTopY + 2, barX + 3, barBottomY - 2, 0xFF3D4249);
+
+            //filled emerald section
+            float fraction = (float)(this.currentBet - this.minBet) / (this.maxBet - this.minBet);
+            int fillH =  Math.round((barHeight - 4) * fraction);
+            int fillY = (barBottomY - 2) - fillH;
+
+            if(fillH > 0){
+                //emerald
+                context.fill(barX + 1, fillY, barX + barWidth - 1, barBottomY - 2, 0xFF00C853);
+                //inner shine line
+                context.fill(barX + 2, fillY, barX + 3, barBottomY - 2, 0xFF69F0AE);
+                //reflection line
+                context.fill(barX + 1, fillY, barX + barWidth - 1, fillY + 1, 0xFFB9F6CA);
+            }
+
+            //bich aali reference dandi
+            int tick20Y = barTopY + (int)(barHeight * 0.35f);
+            context.fill(barX - 4, tick20Y, barX + barWidth + 4, tick20Y + 1, 0x88AAAAAA);
+            context.drawTextWithShadow(this.textRenderer, Text.literal("20"), barX + barWidth + 8, tick20Y - 4, 0xFFAAAAAA);
+
+            int tick10Y = barTopY + (int)(barHeight * 0.68f);
+            context.fill(barX - 4, tick10Y, barX + barWidth + 4, tick10Y + 1, 0x88AAAAAA);
+            context.drawTextWithShadow(this.textRenderer, Text.literal("10"), barX - 18, tick10Y - 4, 0xFFAAAAAA);
+
+            //current bet
+            context.fill(barX - 5, fillY, barX, fillY + 1, 0xFFFFE57F);
+            context.drawTextWithShadow(this.textRenderer, Text.literal(String.valueOf(this.currentBet)), barX - 22, fillY - 4, 0xFFFFE57F);
+
+            //golden coin w emerald
+            int coinCenterY = barBottomY + 18;
+            drawCoin(context, leftCenterX, coinCenterY, 12);
+            context.drawItem(new ItemStack(Items.EMERALD), leftCenterX - 8, coinCenterY - 8);
+
+            int rightStartX = contentX + (int)(contentWidth * 0.40f);
+            int rightWidth = contentWidth - (int)(contentWidth * 0.40f);
+            int rightCenterX = rightStartX + (rightWidth / 2);
+            int cardW = 28;
+            int cardH = 40;
+            int cardsCenterY = contentY + 36;
+
+            float maxAngle = (this.cardCount <= 5) ? (this.cardCount - 1)*6.0f : 24.0f;
+            float angleStep = (this.cardCount > 1) ? (maxAngle * 2.0f) / (this.cardCount - 1) : 0.0F;
+            float stepX = (this.cardCount > 1) ? Math.min(14.0f, 120.0f / (this.cardCount - 1)) : 0.0f;
+            MatrixStack matrices = context.getMatrices();
+            for(int i = 0; i < this.cardCount; i++){
+                float offset = i - (this.cardCount - 1) / 2.0f;
+                float angle = -maxAngle + i * angleStep;
+                int cardX = rightCenterX + (int)(offset * stepX);
+                int cardY = cardsCenterY + (int)(offset * offset * 0.8f);
+                matrices.push();
+                matrices.translate(cardX, cardY, 0);
+                matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(angle));
+                matrices.translate(-cardW / 2.0f, -cardH / 2.0f, 0);
+
+                context.drawTexture(CARD_BACK_TEXTURE, 0, 0, cardW, cardH, 0.0F, 0.0F, 32, 32, 32, 32);
+                context.drawBorder(0, 0, cardW, cardH, 0xFF3D2A10);
+                matrices.pop();
+            }
+            int playButtonY = contentY + contentHeight - 38;
+            int stepperY = playButtonY - 26;
+            String cardText = this.cardCount + (this.cardCount == 1 ? " Card" : " Cards");
+            context.drawCenteredTextWithShadow(this.textRenderer, cardText, rightCenterX, stepperY + 6, 0xFFFFFFFF);
+
+            //cost
+            int emeraldTextY = playButtonY + 23;
+            context.drawItem(new ItemStack(Items.EMERALD), rightCenterX - 36, emeraldTextY - 3);
+            context.drawTextWithShadow(this.textRenderer, Text.literal(this.currentBet + " Emeralds"), rightCenterX - 18, emeraldTextY + 1, 0xFF55FF55);
+
+        } else {
             context.fill(contentX, contentY, contentX + contentWidth, contentY + contentHeight, 0x33000000);
             context.drawBorder(contentX, contentY, contentWidth, contentHeight, 0x22000000);
         }
@@ -174,8 +338,70 @@ public class GamblingTableScreen extends Screen{
                     return true;
                 }
             }
+            //drag bet on meter
+            if(this.selectedSection == 0){
+                int contentX = this.left + 16;
+                int contentY = this.tabY + this.tabHeight + 10;
+                int contentWidth = this.bgWidth - 32;
+                int leftWidth = (int)(contentWidth * 0.40f);
+                int leftCenterX = contentX + (leftWidth / 2);
+                int barX = leftCenterX - 6;
+                int barWidth = 12;
+                int barTopY = contentY + 14;
+                int barHeight = 84;
+
+                if(mouseX >= barX - 16 && mouseX <= barX + barWidth + 16 && mouseY >= barTopY && mouseY <= barTopY + barHeight){
+                    this.isDraggingMeter = true;
+                    updateBetFromMouse(mouseY, barTopY, barHeight);
+                    return true;
+                }
+            }
         }
         return super.mouseClicked(mouseX, mouseY, button);
+    }
+
+    @Override
+    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY){
+        if(this.isDraggingMeter && this.selectedSection == 0){
+            int contentY = this.tabY + this.tabHeight + 10;
+            int barTopY = contentY + 14;
+            int barHeight = 84;
+            updateBetFromMouse(mouseY, barTopY, barHeight);
+            return true;
+        }
+        return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
+    }
+
+    @Override
+    public boolean mouseReleased(double mouseX, double mouseY, int button){
+        if(button == 0){
+            this.isDraggingMeter = false;
+        }
+        return super.mouseReleased(mouseX, mouseY, button);
+    }
+
+    private void updateBetFromMouse(double mouseY, int barTopY, int barHeight){
+        float fraction = 1.0f - (float)((mouseY - barTopY) / barHeight);
+        fraction = Math.max(0.0f, Math.min(1.0f, fraction));
+        this.currentBet = this.minBet + Math.round(fraction * (this.maxBet - this.minBet));
+    }
+
+    private void drawCoin(DrawContext context, int centerX, int centerY, int radius){
+        int r2 = radius * radius;
+        int innerR2 = (radius - 2) * (radius - 2);
+        for(int dy = -radius; dy <= radius; dy++){
+            for(int dx = -radius; dx <= radius; dx++){
+                int d2 = dx * dx + dy * dy;
+                if(d2 <= r2){
+                    if(d2 > innerR2){
+                        int color = (dx + dy < 0) ? 0xFFFFE57F : 0xFF9E7206;
+                        context.fill(centerX + dx, centerY + dy, centerX + dx + 1, centerY + dy + 1, color);
+                    } else {
+                        context.fill(centerX + dx,centerY + dy, centerX + dx + 1, centerY + dy + 1, 0xFF2A2213);
+                    }
+                }
+            }
+        }
     }
 
     @Override

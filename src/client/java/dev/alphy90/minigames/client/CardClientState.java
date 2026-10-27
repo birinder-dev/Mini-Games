@@ -69,7 +69,7 @@ public class CardClientState {
         }
     }
 
-    //hold &charge logic
+    //fadan and throw lyi
 
     public static int getHoldTicks(){
         return holdTicks;
@@ -77,7 +77,6 @@ public class CardClientState {
 
     public static void incrementHold(){
         holdTicks++;
-        //1sec to initiate
         if(holdTicks >= 20){
             throwCharging = true;
         }
@@ -95,7 +94,6 @@ public class CardClientState {
     public static float getThrowPower(){
         if(holdTicks < 20) return 0.0F;
 
-        //next 3sec, 0.15->1.0
         int chargeTicks = Math.min(60, holdTicks - 20);
         return (float) (0.15 + (0.85 * (chargeTicks / 60.0F)));
     }
@@ -145,7 +143,6 @@ public class CardClientState {
         flickTicks = 0;
     }
 
-    // centred hotbar slots
     public static int getStartSlotIndex(int count){
         return 4 - (count/2);
     }
