@@ -157,7 +157,15 @@ public class GamblingTableScreen extends Screen{
     }
 
     @Override
+    public void renderBackground(DrawContext context, int mouseX, int mouseY, float delta){
+        // Empty so super.render() at the bottom doesn't run blur/darken over our custom GUI
+    }
+
+    @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta){
+        // Blurs and darkens only the 3D world behind the table window
+        super.renderBackground(context, mouseX, mouseY, delta);
+
         // Texture original dimensions
         int texW = 1448;
         int texH = 1086;
