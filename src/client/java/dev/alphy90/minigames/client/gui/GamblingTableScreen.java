@@ -2,6 +2,8 @@ package dev.alphy90.minigames.client.gui;
 
 import dev.alphy90.minigames.MiniGames;
 
+import dev.alphy90.minigames.game.CardSuit;
+import dev.alphy90.minigames.game.TavernCard;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
@@ -9,17 +11,21 @@ import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.util.math.RotationAxis;
 
+import javax.smartcardio.Card;
+
 public class GamblingTableScreen extends Screen{
     private static final Identifier BG_TEXTURE = Identifier.of(MiniGames.MOD_ID, "textures/gui/bg_table_texture_main.png");
     private static final Identifier EMERALD_TEXTURE = Identifier.of(MiniGames.MOD_ID, "textures/gui/emerald_block.png");
     private static final Identifier CARD_BACK_TEXTURE = Identifier.of(MiniGames.MOD_ID, "textures/item/tavern_card.png");
-    private static final String[] TAB_NAMES = {"Section 1", "Section 2", "Advanced"};
+    private static final Identifier CARD_FRONT_TEXTURE = Identifier.of(MiniGames.MOD_ID, "textures/item/tavern_card_front.png");
+    private static final String[] TAB_NAMES = {"Game", "Rules", "Advanced"};
     private static final String[] DIFFICULTIES = {"Medium", "Easy", "Hard"};
 
     private int difficultyIndex = 0;
@@ -43,6 +49,7 @@ public class GamblingTableScreen extends Screen{
     private int cardCount = 5;
     private final int minCards = 1;
     private final int maxCards = 9;
+    private double scroll = 0.0;
     private ButtonWidget backCardButton;
     private ButtonWidget nextCardButton;
     private ButtonWidget playButton;
@@ -307,7 +314,6 @@ public class GamblingTableScreen extends Screen{
                 matrices.translate(-cardW / 2.0f, -cardH / 2.0f, 0);
 
                 context.drawTexture(CARD_BACK_TEXTURE, 0, 0, cardW, cardH, 0.0F, 0.0F, 32, 32, 32, 32);
-                context.drawBorder(0, 0, cardW, cardH, 0xFF3D2A10);
                 matrices.pop();
             }
             int playButtonY = contentY + contentHeight - 38;
@@ -320,6 +326,59 @@ public class GamblingTableScreen extends Screen{
             context.drawItem(new ItemStack(Items.EMERALD), rightCenterX - 36, emeraldTextY - 3);
             context.drawTextWithShadow(this.textRenderer, Text.literal(this.currentBet + " Emeralds"), rightCenterX - 18, emeraldTextY + 1, 0xFF55FF55);
 
+        } else if (this.selectedSection == 1) {
+            int totalContentHeight = 160;
+            int maxScroll = Math.max(0, totalContentHeight - contentHeight);
+            context.enableScissor(contentX, contentY, contentX + contentWidth, contentY + contentHeight);
+            int startY = contentY + 10 - (int)this.scroll;
+            int curY = startY;
+
+            context.drawText(this.textRenderer, "Every card suit got a special condition to win the round.", contentX + 10, curY, 0xFFCCCCCC, false);
+            curY+=11;
+            context.drawText(this.textRenderer, "Which condition is selected is decided by a Priority Order:", contentX + 10, curY, 0xFF999999, false);
+            curY += 15;
+
+            MatrixStack matrices = context.getMatrices();
+            matrices.push();
+            matrices.translate(contentX + 10, curY, 0);
+            matrices.scale(1.15f, 1.15f, 1.0f);
+            context.drawTextWithShadow(this.textRenderer, Text.literal("1. Priority Order:").formatted(Formatting.BOLD), 0, 0, 0xFFFFD700);
+            matrices.pop();
+            curY += 16;
+
+            context.drawTextWithShadow(this.textRenderer, Text.literal("Swords ⚔  >  Shields \uD83D\uDEE1").formatted(Formatting.GOLD), contentX + 18, curY, 0xFFAAAAAA);
+            curY += 13;
+            context.drawText(this.textRenderer, "• If any Sword is played, the Sword condition takes priority.", contentX + 10, curY, 0xFFAAAAAA, false);
+            curY += 11;
+            context.drawText(this.textRenderer, "• Shield rule only applies when BOTH played cards are Shield.", contentX + 10, curY, 0xFFAAAAAA, false);
+            curY += 16;
+
+            int cardW = 24;
+            int cardH = 34;
+
+            //left-different suit
+            int leftCenterX = contentX + 70;
+            drawFrontCard(context, leftCenterX - 26, curY, cardW, cardH, CardSuit.SWORD, 7);
+            drawFrontCard(context, leftCenterX + 2, curY, cardW, cardH, CardSuit.SHIELD, 4);
+            context.drawCenteredTextWithShadow(this.textRenderer, "⚔ Prioritised", leftCenterX, curY + cardH + 4, 0xFFFF6666);
+
+            //right-same
+            int rightCenterX = contentX + 210;
+            drawFrontCard(context, rightCenterX - 26, curY, cardW, cardH, CardSuit.SHIELD, 6);
+            drawFrontCard(context, rightCenterX + 2, curY, cardW, cardH, CardSuit.SHIELD, 2);
+            context.drawCenteredTextWithShadow(this.textRenderer, "\uD83D\uDEE1 Prioritised", rightCenterX, curY + cardH + 4, 0xFF55AAFF);
+            curY += cardH + 20;
+            context.disableScissor();
+
+            if(maxScroll > 0){
+                int scrollbarX = contentX + contentWidth - 4;
+                int trackH = contentHeight - 4;
+                int thumbH = Math.max(16, (int)((float) contentHeight / totalContentHeight * trackH));
+                int thumbY = contentY + 2 + (int) ((this.scroll / maxScroll) * (trackH - thumbH));
+
+                context.fill(scrollbarX, contentY + 2, scrollbarX + 2, contentY + 2 + trackH, 0x44000000);
+                context.fill(scrollbarX, thumbY, scrollbarX + 2, thumbY + thumbH, 0xAAFFFFFF);
+            }
         } else {
             context.fill(contentX, contentY, contentX + contentWidth, contentY + contentHeight, 0x33000000);
             context.drawBorder(contentX, contentY, contentWidth, contentHeight, 0x22000000);
@@ -412,6 +471,10 @@ public class GamblingTableScreen extends Screen{
         }
     }
 
+    private void drawFrontCard(DrawContext context, int x, int y, int w, int h, CardSuit suit, int value){
+       dev.alphy90.minigames.client.render.CardRenderHelper.renderFrontCardForGui(context, this.textRenderer, CARD_FRONT_TEXTURE, x, y, w, h, new TavernCard(suit, value));
+    }
+
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers){
         if(super.keyPressed(keyCode, scanCode, modifiers)){
@@ -429,5 +492,18 @@ public class GamblingTableScreen extends Screen{
     @Override
     public boolean shouldPause(){
         return false;
+    }
+
+    @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double horizontal, double vertical){
+        if(this.selectedSection == 1){
+            int totaContentHeight = 160;
+            int contentY = this.tabY + this.tabHeight + 10;
+            int contentHeight = (this.top + this.bgHeight - 16) - contentY;
+            int maxScroll = Math.max(0, totaContentHeight - contentHeight);
+            this.scroll = Math.max(0.0, Math.min(maxScroll, this.scroll - vertical * 14.0));
+            return true;
+        }
+        return super.mouseScrolled(mouseX, mouseY, horizontal, vertical);
     }
 }

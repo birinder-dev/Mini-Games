@@ -85,6 +85,53 @@ public class CardRenderHelper {
         }
     }
 
+    public static void renderFrontCardForGui(net.minecraft.client.gui.DrawContext context, TextRenderer textRenderer, net.minecraft.util.Identifier frontTexture, int x, int y, int w, int h, TavernCard card){
+        if(card == null) return;
+
+        context.drawTexture(frontTexture, x, y, w, h, 0.0f, 0.0f, 32, 32, 32, 32);
+        String num = String.valueOf(card.value());
+        String symbol = card.suit().getSymbol();
+        int symW = textRenderer.getWidth(symbol);
+        int symbolColor = (card.suit() == CardSuit.SWORD) ? 0xFFD32F2F : 0xFF2A6F97;
+        int numberColor = 0xFF1C1C1C;
+
+        MatrixStack matrices = context.getMatrices();
+        context.drawText(textRenderer, num, x + 3, y + 3, numberColor, false);
+        matrices.push();
+        matrices.translate(x + w - 3, y + h - 3, 0);
+        matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(180.0f));
+        context.drawText(textRenderer, num, 0, 0, numberColor, false);
+        matrices.pop();
+
+        float cx = x + (w / 2.0f);
+        float cy = y + (h / 2.0f);
+        int val = Math.max(1, Math.min(10, card.value()));
+
+        if(val == 1){
+            matrices.push();
+            matrices.translate(cx, cy, 0);
+            matrices.scale(0.75f, 0.75f, 1.0f);
+            context.drawText(textRenderer, symbol, -symW / 2, -4, symbolColor, false);
+            matrices.pop();
+        } else {
+            float pipScale = (val <= 4) ? 0.52f : 0.44f;
+            float spreadX = (w / 2.0f) * 0.42f;
+            float spreadY = (h / 2.0f) * 0.52f;
+            float[][] coords = getPipCoords(val);
+
+            for(float[] pt : coords){
+                float px = cx + (pt[0] * spreadX);
+                float py = cy - (pt[1] * spreadY);
+
+                matrices.push();
+                matrices.translate(px, py, 0);
+                matrices.scale(pipScale, pipScale, 1.0f);
+                context.drawText(textRenderer, symbol, -symW / 2, -4, symbolColor, false);
+                matrices.pop();
+            }
+        }
+    }
+
     private static float[][] getPipCoords(int val) {
         return switch (val) {
             case 2 -> new float[][] { { 0.0F, 0.65F }, { 0.0F, -0.65F } };
