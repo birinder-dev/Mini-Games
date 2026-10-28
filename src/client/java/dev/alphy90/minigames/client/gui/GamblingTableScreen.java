@@ -4,6 +4,8 @@ import dev.alphy90.minigames.MiniGames;
 
 import dev.alphy90.minigames.game.CardSuit;
 import dev.alphy90.minigames.game.TavernCard;
+import dev.alphy90.minigames.network.StartTableGamePayload;
+import net.fabricmc.fabric.impl.resource.loader.FabricOriginalKnownPacksGetter;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
@@ -19,6 +21,7 @@ import net.minecraft.item.Items;
 import net.minecraft.util.math.RotationAxis;
 
 import javax.smartcardio.Card;
+import java.text.Normalizer;
 
 public class GamblingTableScreen extends Screen{
     private static final Identifier BG_TEXTURE = Identifier.of(MiniGames.MOD_ID, "textures/gui/bg_table_texture_main.png");
@@ -129,9 +132,10 @@ public class GamblingTableScreen extends Screen{
         this.playButton = ButtonWidget.builder(
                 Text.literal("Start Play!"),
                 btn -> {
-                    if(this.client != null && this.client.player != null){
-                        this.client.player.sendMessage(Text.literal("Playing with " + this.cardCount + " cards and " + this.currentBet + " emeralds"), true);
-                    }
+                    net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.send(
+                            new StartTableGamePayload(this.tablePos, this.currentBet, this.cardCount, this.difficultyIndex)
+                    );
+                    this.close();
                 }
         ).dimensions(rightCenterX - (playButtonWidth / 2), playButtonY, playButtonWidth, 20).build();
         this.addDrawableChild(this.backCardButton);
@@ -327,7 +331,7 @@ public class GamblingTableScreen extends Screen{
             context.drawTextWithShadow(this.textRenderer, Text.literal(this.currentBet + " Emeralds"), rightCenterX - 18, emeraldTextY + 1, 0xFF55FF55);
 
         } else if (this.selectedSection == 1) {
-            int totalContentHeight = 160;
+            int totalContentHeight = 280;
             int maxScroll = Math.max(0, totalContentHeight - contentHeight);
             context.enableScissor(contentX, contentY, contentX + contentWidth, contentY + contentHeight);
             int startY = contentY + 10 - (int)this.scroll;
@@ -367,6 +371,43 @@ public class GamblingTableScreen extends Screen{
             drawFrontCard(context, rightCenterX - 26, curY, cardW, cardH, CardSuit.SHIELD, 6);
             drawFrontCard(context, rightCenterX + 2, curY, cardW, cardH, CardSuit.SHIELD, 2);
             context.drawCenteredTextWithShadow(this.textRenderer, "\uD83D\uDEE1 Prioritised", rightCenterX, curY + cardH + 4, 0xFF55AAFF);
+            curY += cardH + 20;
+
+            curY += cardH + 24;
+            int leftColX = contentX + 10;
+            int scenarioCenterX = contentX + 210;
+            //sword
+            matrices.push();
+            matrices.translate(leftColX, curY, 0);
+            matrices.scale(1.10f, 1.10f, 1.0f);
+            context.drawTextWithShadow(this.textRenderer, Text.literal("2. Sword Rule (⚔):").formatted(Formatting.BOLD), 0, 0, 0xFFFF6666);
+            matrices.pop();
+            context.drawText(this.textRenderer, "When a Sword is active,", leftColX, curY + 13, 0xFFCCCCCC, false);
+            context.drawText(this.textRenderer, "the HIGHEST value cuts down", leftColX, curY + 23, 0xFFFFFFFF, false);
+            context.drawText(this.textRenderer, "the foe and wins the round.", leftColX, curY + 33, 0xFFCCCCCC, false);
+
+            drawFrontCard(context, scenarioCenterX - 27, curY, cardW, cardH, CardSuit.SWORD, 8);
+            drawFrontCard(context, scenarioCenterX + 3, curY, cardW, cardH, CardSuit.SWORD, 4);
+            context.drawCenteredTextWithShadow(this.textRenderer, "You", scenarioCenterX - 15, curY + cardH +2, 0xFFFFAA00);
+            context.drawCenteredTextWithShadow(this.textRenderer, "Gambler", scenarioCenterX + 15, curY + cardH, 0xFFAAAAAA);
+            context.drawCenteredTextWithShadow(this.textRenderer, "★ You Win! (8 > 4)", scenarioCenterX, curY +cardH + 13, 0xFF55FF55);
+            curY += cardH + 30;
+
+            //shield
+            matrices.push();
+            matrices.translate(leftColX, curY, 0);
+            matrices.scale(1.10f, 1.10f, 1.0f);
+            context.drawTextWithShadow(this.textRenderer, Text.literal("3. Shield Rule (\\uD83D\\uDEE1):").formatted(Formatting.BOLD), 0, 0, 0xFF55AAFF);
+            matrices.pop();
+            context.drawText(this.textRenderer, "When both cards are Shields,", leftColX, curY + 13, 0xFFCCCCCC, false);
+            context.drawText(this.textRenderer, "the LOWEST value parries", leftColX, curY + 23, 0xFFFFFFFF, false);
+            context.drawText(this.textRenderer, "the attack and wins!", leftColX, curY + 33, 0xFFCCCCCC, false);
+
+            drawFrontCard(context, scenarioCenterX - 27, curY, cardW, cardH, CardSuit.SHIELD, 3);
+            drawFrontCard(context, scenarioCenterX + 3, curY, cardW, cardH, CardSuit.SHIELD, 7);
+            context.drawCenteredTextWithShadow(this.textRenderer, "You", scenarioCenterX - 15, curY + cardH + 2, 0xFFFFAA00);
+            context.drawCenteredTextWithShadow(this.textRenderer, "Gambler", scenarioCenterX + 15, curY + cardH + 2, 0xFFAAAAAA);
+            context.drawCenteredTextWithShadow(this.textRenderer, "★ You Win! (3 < 7)", scenarioCenterX , curY + cardH + 13, 0xFF55FF55);
             curY += cardH + 20;
             context.disableScissor();
 
@@ -497,7 +538,7 @@ public class GamblingTableScreen extends Screen{
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double horizontal, double vertical){
         if(this.selectedSection == 1){
-            int totaContentHeight = 160;
+            int totaContentHeight = 280;
             int contentY = this.tabY + this.tabHeight + 10;
             int contentHeight = (this.top + this.bgHeight - 16) - contentY;
             int maxScroll = Math.max(0, totaContentHeight - contentHeight);

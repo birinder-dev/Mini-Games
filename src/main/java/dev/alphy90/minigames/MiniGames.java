@@ -2,6 +2,7 @@ package dev.alphy90.minigames;
 
 import dev.alphy90.minigames.block.GamblingStoolBlock;
 import dev.alphy90.minigames.block.CardBlock;
+import dev.alphy90.minigames.block.GamblingTableBlock;
 import dev.alphy90.minigames.game.TavernCard;
 import dev.alphy90.minigames.network.*;
 import dev.alphy90.minigames.entity.GamblerEntity;
@@ -177,6 +178,7 @@ public class MiniGames implements ModInitializer {
 
 		PayloadTypeRegistry.playS2C().register(TablePlayingPayload.ID, TablePlayingPayload.CODEC);
 		PayloadTypeRegistry.playS2C().register(OpenTableScreenPayload.ID, OpenTableScreenPayload.CODEC);
+		PayloadTypeRegistry.playC2S().register(StartTableGamePayload.ID, StartTableGamePayload.CODEC);
 
 		ServerPlayNetworking.registerGlobalReceiver(CardStateC2SPayload.ID, ((payload, context) -> {
 			ServerPlayerEntity sender = context.player();
@@ -184,6 +186,17 @@ public class MiniGames implements ModInitializer {
 			for (ServerPlayerEntity tracking : PlayerLookup.tracking(sender)){
 				ServerPlayNetworking.send(tracking, s2c);
 			}
+		}));
+
+		ServerPlayNetworking.registerGlobalReceiver(StartTableGamePayload.ID, ((payload, context) -> {
+			context.server().execute(() -> {
+				ServerPlayerEntity player = context.player();
+				ServerWorld world = player.getServerWorld();
+
+				if(world.getBlockEntity(payload.tablePos()) instanceof dev.alphy90.minigames.block.entity.GamblingTableBlockEntity tableBe){
+					tableBe.startGame(player, payload.betAmount(), payload.cardCount(), payload.difficulty());
+				}
+			});
 		}));
 
 		PayloadTypeRegistry.playC2S().register(PlayTableCardPayLoad.ID, PlayTableCardPayLoad.CODEC);
