@@ -35,14 +35,15 @@ setblock -6 101 0 barrel[facing=east]{Items:[{Slot:0b,id:"minecraft:emerald",cou
 
 setblock -7 102 1 oak_wall_sign[facing=east]{front_text:{color:"gold",has_glowing_text:1b,messages:['{"text":"[GAMBLING TABLE]","bold":true}','{"text":"1. Sit on stool"}','{"text":"2. Click table"}','{"text":"3. Set bet & Play"}']}}
 setblock -7 102 -1 oak_wall_sign[facing=east]{front_text:{color:"green",has_glowing_text:1b,messages:['{"text":"[BETTING POT]","bold":true}','{"text":"Take emeralds"}','{"text":"from the barrel"}','{"text":"to wager bets"}']}}
+setblock -7 102 -3 oak_wall_sign[facing=east]{front_text:{color:"light_purple",has_glowing_text:1b,messages:['{"text":"[TIE RULE]","bold":true}','{"text":"Same suit & val"}','{"text":"Ties the round"}','{"text":"Draw replacement!"}']}}
 
 setblock 6 101 0 stripped_spruce_log
 setblock 6 102 0 target
 summon armor_stand 5.5 101 0 {NoBasePlate:1b,ShowArms:1b,ArmorItems:[{},{},{},{id:"minecraft:zombie_head",count:1}]}
 setblock 6 101 -2 barrel[facing=west]{Items:[{Slot:0b,id:"minigames:tavern_card",count:9},{Slot:1b,id:"minigames:tavern_card",count:9},{Slot:2b,id:"minigames:tavern_card",count:9}]}
 
-setblock 7 103 0 oak_wall_sign[facing=west]{front_text:{color:"yellow",has_glowing_text:1b,messages:['{"text":"[CARD THROW]","bold":true}','{"text":"Right-click card"}','{"text":"Throws card"}','{"text":"as projectile!"}']}}
-setblock 7 103 -2 oak_wall_sign[facing=west]{front_text:{color:"aqua",has_glowing_text:1b,messages:['{"text":"[CARD FANNING]","bold":true}','{"text":"Shift + Right-click"}','{"text":"Fans out deck"}','{"text":"in hand"}']}}
-setblock 7 103 2 oak_wall_sign[facing=west]{front_text:{color:"light_purple",has_glowing_text:1b,messages:['{"text":"[TIE RULE]","bold":true}','{"text":"Same suit & val"}','{"text":"Ties the round"}','{"text":"Draw replacement!"}']}}
+setblock 7 103 -2 oak_wall_sign[facing=west]{front_text:{color:"aqua",has_glowing_text:1b,messages:['{"text":"[CARD PLACE]","bold":true}','{"text":"Tap Right-Click"}','{"text":"Places card on"}','{"text":"block surface"}']}}
+setblock 7 103 0 oak_wall_sign[facing=west]{front_text:{color:"yellow",has_glowing_text:1b,messages:['{"text":"[CARD THROW]","bold":true}','{"text":"Hold Right-Click"}','{"text":"Charges & throws"}','{"text":"as projectile!"}']}}
+setblock 7 103 2 oak_wall_sign[facing=west]{front_text:{color:"green",has_glowing_text:1b,messages:['{"text":"[CARD FANNING]","bold":true}','{"text":"Shift + R-Click"}','{"text":"Fans out deck"}','{"text":"or collapses it"}']}}
 
 execute as @a run function tavern:player_setup
