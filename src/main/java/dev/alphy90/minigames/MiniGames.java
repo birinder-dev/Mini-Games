@@ -106,7 +106,7 @@ public class MiniGames implements ModInitializer {
 	public static final RegistryKey<ItemGroup> MINI_GAMES_GROUP_KEY = RegistryKey.of(RegistryKeys.ITEM_GROUP, Identifier.of(MOD_ID, "mini_games_tab"));
 
 	public static final ItemGroup MINI_GAMES_GROUP = FabricItemGroup.builder()
-			.icon(() -> new ItemStack(Items.BARRIER))
+			.icon(() -> new ItemStack(TAVERN_CARD))
 			.displayName(Text.translatableWithFallback("itemGroup.minigames.mini_games_tab", "Mini Games"))
 			.entries((context, entries) -> {
 				entries.add(GAMBLING_TABLE_ITEM);

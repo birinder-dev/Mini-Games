@@ -8,7 +8,8 @@
 		"MinecraftClientMixin",
 		"AbstractClientPlayerEntityMixin",
 		"HeldItemFeatureRendererMixin",
-		"BipedEntityModelMixin"
+		"BipedEntityModelMixin",
+		"ItemGroupsPageMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

@@ -103,8 +103,14 @@ public class GamblerEntity extends PathAwareEntity {
                 for(net.minecraft.util.math.Direction dir : Direction.Type.HORIZONTAL){
                     BlockPos tablePos = stoolPos.offset(dir);
                     if(this.getWorld().getBlockEntity(tablePos) instanceof dev.alphy90.minigames.block.entity.GamblingTableBlockEntity tableBe){
-                        if(tableBe.areGameConditionsMet((net.minecraft.server.world.ServerWorld)this.getWorld(), serverPlayer) && !tableBe.isGameActive()){
-                            net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(serverPlayer, new dev.alphy90.minigames.network.OpenTableScreenPayload(tablePos));
+                        if(tableBe.areGameConditionsMet((net.minecraft.server.world.ServerWorld)this.getWorld(), serverPlayer)){
+                            if (tableBe.isGameActive() && (tableBe.getActivePlayerUuid() == null || !tableBe.getActivePlayerUuid().equals(serverPlayer.getUuid()))) {
+                                tableBe.resetGame();
+                            }
+                            if (!tableBe.isGameActive()) {
+                                net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(serverPlayer, new dev.alphy90.minigames.network.OpenTableScreenPayload(tablePos));
+                                return ActionResult.SUCCESS;
+                            }
                             return ActionResult.SUCCESS;
                         }
                     }
@@ -121,5 +127,17 @@ public class GamblerEntity extends PathAwareEntity {
             return new net.minecraft.util.math.Vec3d(0.0, 0.6, 0.0);
         }
         return super.getVehicleAttachmentPos(vehicle);
+    }
+
+    @Override
+    public void onDeath(net.minecraft.entity.damage.DamageSource damageSource) {
+        super.onDeath(damageSource);
+        if (this.hasVehicle()) {
+            net.minecraft.entity.Entity vehicle = this.getVehicle();
+            this.dismountVehicle();
+            if (vehicle instanceof SeatEntity seat) {
+                seat.discard();
+            }
+        }
     }
 }

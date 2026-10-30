@@ -4,16 +4,17 @@
   "features": {
     "ghcr.io/devcontainers/features/desktop-lite:1": {
       "version": "latest",
-      "password": "demo"
+      "password": ""
     }
   },
   "forwardPorts": [6080],
   "portsAttributes": {
     "6080": {
       "label": "Play Mini-Games Demo",
-      "onAutoForward": "openBrowser"
+      "onAutoForward": "openBrowser",
+      "visibility": "public"
     }
   },
-  "postCreateCommand": "sudo apt-get update && sudo apt-get install -y libgl1-mesa-dri libgl1-mesa-glx mesa-utils && chmod +x .devcontainer/start-demo.sh",
-  "postStartCommand": "bash .devcontainer/start-demo.sh"
+  "postCreateCommand": "sudo apt-get update && sudo apt-get install -y libgl1-mesa-dri libgl1-mesa-glx mesa-utils xdotool procps && chmod +x .devcontainer/start-demo.sh && sudo cp .devcontainer/web/* /usr/local/novnc/",
+  "postStartCommand": "bash .devcontainer/start-demo.sh &"
 }

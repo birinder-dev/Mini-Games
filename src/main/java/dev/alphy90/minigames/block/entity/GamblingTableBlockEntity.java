@@ -166,8 +166,20 @@ public class GamblingTableBlockEntity extends BlockEntity {
     }
 
     public static void tick(World world, BlockPos pos, BlockState state, GamblingTableBlockEntity be) {
-        if (world.isClient())
-            return;
+        if (world.isClient()) return;
+
+        if (be.gameActive) {
+            boolean valid = false;
+            if (world instanceof ServerWorld sw) {
+                ServerPlayerEntity player = (be.activePlayerUuid != null && sw.getPlayerByUuid(be.activePlayerUuid) instanceof ServerPlayerEntity spe) ? spe : null;
+                if (player != null && player.isAlive() && be.areGameConditionsMet(sw, player)) {
+                    valid = true;
+                }
+            }
+            if (!valid) {
+                be.resetGame();
+            }
+        }
 
         if(be.gamblerPlayDelay > 0){
             be.gamblerPlayDelay--;
@@ -272,7 +284,7 @@ public class GamblingTableBlockEntity extends BlockEntity {
             if (world.getBlockState(stoolPos).getBlock() instanceof GamblingStoolBlock) {
                 Box box = new Box(stoolPos).expand(0.2);
                 for (SeatEntity seat : world.getEntitiesByClass(SeatEntity.class, box, SeatEntity::hasPassengers)) {
-                    if (seat.getFirstPassenger() instanceof GamblerEntity) {
+                    if (seat.getFirstPassenger() instanceof GamblerEntity gambler && gambler.isAlive() && !gambler.isRemoved()) {
                         Direction playerFacing = dir.getOpposite();
                         if (this.getCachedState()
                                 .get(dev.alphy90.minigames.block.GamblingTableBlock.FACING) != playerFacing) {
@@ -300,6 +312,9 @@ public class GamblingTableBlockEntity extends BlockEntity {
                 this.pileCount = 8;
                 this.markDirty();
                 this.world.updateListeners(this.pos, this.getCachedState(), this.getCachedState(), 3);
+            }
+            if (this.gameActive && (this.activePlayerUuid == null || !this.activePlayerUuid.equals(player.getUuid()))) {
+                this.resetGame();
             }
             if (!this.gameActive) {
                 net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(player,
@@ -343,7 +358,7 @@ public class GamblingTableBlockEntity extends BlockEntity {
         for (dev.alphy90.minigames.entity.SeatEntity seat : serverWorld.getEntitiesByClass(
                 dev.alphy90.minigames.entity.SeatEntity.class, box,
                 dev.alphy90.minigames.entity.SeatEntity::hasPassengers)) {
-            if (seat.getFirstPassenger() instanceof dev.alphy90.minigames.entity.GamblerEntity) {
+            if (seat.getFirstPassenger() instanceof dev.alphy90.minigames.entity.GamblerEntity gambler && gambler.isAlive() && !gambler.isRemoved()) {
                 gamblerPresentOpposite = true;
                 break;
             }
@@ -435,5 +450,38 @@ public class GamblingTableBlockEntity extends BlockEntity {
     public void setGameActive(boolean active) {
         this.gameActive = active;
         this.markDirty();
+    }
+
+    public java.util.UUID getActivePlayerUuid() {
+        return this.activePlayerUuid;
+    }
+
+    public void resetGame() {
+        if (this.gameActive) {
+            if (this.world instanceof ServerWorld sw && this.activePlayerUuid != null) {
+                ServerPlayerEntity player = (this.activePlayerUuid != null && sw.getPlayerByUuid(this.activePlayerUuid) instanceof ServerPlayerEntity spe) ? spe : null;
+                if (player != null) {
+                    int scoreToWin = (this.totalCards / 2) + 1;
+                    if (this.matchBet > 0 && this.playerScore < scoreToWin && this.gamblerScore < scoreToWin) {
+                        player.sendMessage(Text.literal("\u00A7cMatch Abandoned: You left the game and your bet was forfeited."), false);
+                    }
+                    ServerPlayNetworking.send(player, new TablePlayingPayload(false, 0, 0));
+                }
+            }
+        }
+        this.gameActive = false;
+        this.activePlayerUuid = null;
+        this.playerCard = null;
+        this.gamblerCard = null;
+        this.playerHand.clear();
+        this.gamblerHand.clear();
+        this.clearCardsCooldown = 0;
+        this.gamblerPlayDelay = 0;
+        this.playerScore = 0;
+        this.gamblerScore = 0;
+        this.markDirty();
+        if (this.world != null) {
+            this.world.updateListeners(this.pos, this.getCachedState(), this.getCachedState(), 3);
+        }
     }
 }
