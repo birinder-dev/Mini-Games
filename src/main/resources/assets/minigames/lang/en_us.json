@@ -1,5 +1,7 @@
 {
+  "itemGroup.minigames.mini_games_tab": "Mini Games",
   "item.minigames.tavern_card": "Tavern Card",
+  "block.minigames.gambling_table": "Gambling Table",
   "block.minigames.gambling_stool": "Gambling Stool",
   "entity.minigames.gambler": "Gambler",
   "item.minigames.gambler_spawn_egg": "Gambler Spawn Egg",

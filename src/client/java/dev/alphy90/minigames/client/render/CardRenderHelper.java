@@ -96,10 +96,16 @@ public class CardRenderHelper {
         int numberColor = 0xFF1C1C1C;
 
         MatrixStack matrices = context.getMatrices();
-        context.drawText(textRenderer, num, x + 3, y + 3, numberColor, false);
+        float numScale = 0.60f;
         matrices.push();
-        matrices.translate(x + w - 3, y + h - 3, 0);
+        matrices.translate(x + 5.2f, y + 3.8f, 0);
+        matrices.scale(numScale, numScale, 1.0f);
+        context.drawText(textRenderer, num, 0, 0, numberColor, false);
+        matrices.pop();
+        matrices.push();
+        matrices.translate(x + w - 5.2f, y + h - 3.8f, 0);
         matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(180.0f));
+        matrices.scale(numScale, numScale, 1.0f);
         context.drawText(textRenderer, num, 0, 0, numberColor, false);
         matrices.pop();
 

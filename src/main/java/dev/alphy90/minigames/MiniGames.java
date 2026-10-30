@@ -32,9 +32,13 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.SpawnGroup;
+import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.RegistryKeys;
+import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
 
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -99,6 +103,19 @@ public class MiniGames implements ModInitializer {
 			0xecb22e, // speckle: gold
 			new Item.Settings());
 
+	public static final RegistryKey<ItemGroup> MINI_GAMES_GROUP_KEY = RegistryKey.of(RegistryKeys.ITEM_GROUP, Identifier.of(MOD_ID, "mini_games_tab"));
+
+	public static final ItemGroup MINI_GAMES_GROUP = FabricItemGroup.builder()
+			.icon(() -> new ItemStack(Items.BARRIER))
+			.displayName(Text.translatableWithFallback("itemGroup.minigames.mini_games_tab", "Mini Games"))
+			.entries((context, entries) -> {
+				entries.add(GAMBLING_TABLE_ITEM);
+				entries.add(GAMBLING_STOOL_ITEM);
+				entries.add(TAVERN_CARD);
+				entries.add(GAMBLER_SPAWN_EGG);
+			})
+			.build();
+
 	@Override
 	public void onInitialize() {
 		// This code runs as soon as Minecraft is in a mod-load-ready state.
@@ -112,6 +129,7 @@ public class MiniGames implements ModInitializer {
 		Registry.register(Registries.BLOCK, id("placed_card"), PLACED_CARD);
 		Registry.register(Registries.BLOCK, id("gambling_table"), GAMBLING_TABLE);
 		Registry.register(Registries.ITEM, id("gambling_table"), GAMBLING_TABLE_ITEM);
+		Registry.register(Registries.ITEM_GROUP, MINI_GAMES_GROUP_KEY, MINI_GAMES_GROUP);
 
 		FabricDefaultAttributeRegistry.register(GAMBLER, GamblerEntity.createGamblerAttributes());
 
@@ -177,6 +195,7 @@ public class MiniGames implements ModInitializer {
 		PayloadTypeRegistry.playS2C().register(CardStateS2CPayload.ID, CardStateS2CPayload.CODEC);
 
 		PayloadTypeRegistry.playS2C().register(TablePlayingPayload.ID, TablePlayingPayload.CODEC);
+		PayloadTypeRegistry.playS2C().register(TableScorePayload.ID, TableScorePayload.CODEC);
 		PayloadTypeRegistry.playS2C().register(OpenTableScreenPayload.ID, OpenTableScreenPayload.CODEC);
 		PayloadTypeRegistry.playC2S().register(StartTableGamePayload.ID, StartTableGamePayload.CODEC);
 

@@ -4,9 +4,12 @@ import dev.alphy90.minigames.MiniGames;
 import dev.alphy90.minigames.client.render.CardProjectileEntityRenderer;
 import dev.alphy90.minigames.client.render.EmptyEntityRenderer;
 import dev.alphy90.minigames.client.render.GamblerEntityRenderer;
+import dev.alphy90.minigames.game.CardDeck;
+import dev.alphy90.minigames.game.TavernCard;
 import dev.alphy90.minigames.network.*;
 
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.fabricmc.fabric.api.event.player.UseItemCallback;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
@@ -30,6 +33,8 @@ import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.util.math.Direction;
 import org.lwjgl.glfw.GLFW;
+
+import javax.smartcardio.Card;
 
 public class MiniGamesClient implements ClientModInitializer {
 
@@ -58,9 +63,35 @@ public class MiniGamesClient implements ClientModInitializer {
 				dev.alphy90.minigames.client.render.GamblingTableBlockEntityRenderer::new
 		);
 
+		HudRenderCallback.EVENT.register(dev.alphy90.minigames.client.gui.TableScoreHud::render);
+
 		ClientPlayNetworking.registerGlobalReceiver(TablePlayingPayload.ID, ((payload, context) -> {
 			context.client().execute(() -> {
 				CardClientState.setTablePlaying(payload.isTablePlaying());
+				if (payload.isTablePlaying()) {
+					CardClientState.resetMatch(payload.cardCount(), payload.betAmount());
+					CardClientState.setActive(true);
+					CardClientState.setCardCount(payload.cardCount());
+				} else {
+					CardClientState.setActive(false);
+					CardClientState.setCardCount(0);
+					CardClientState.resetHold();
+				}
+			});
+		}));
+
+		ClientPlayNetworking.registerGlobalReceiver(TableScorePayload.ID, ((payload, context) -> {
+			context.client().execute(() -> {
+				CardClientState.setPlayerScore(payload.playerScore());
+				CardClientState.setGamblerScore(payload.gamblerScore());
+				CardClientState.setCurrentRound(payload.currentRound());
+				if(payload.roundResult() != 0){
+					CardClientState.addRoundResult(payload.roundResult());
+				}
+				if(payload.newCardSuit() >= 0 && payload.newCardValue() > 0){
+					dev.alphy90.minigames.game.CardSuit suit = dev.alphy90.minigames.game.CardSuit.values()[payload.newCardSuit()];
+					CardClientState.addCard(new dev.alphy90.minigames.game.TavernCard(suit, payload.newCardValue()));
+				}
 			});
 		}));
 
@@ -104,6 +135,22 @@ public class MiniGamesClient implements ClientModInitializer {
 		});
 
 		UseBlockCallback.EVENT.register((player, world, hand, hitResult) -> {
+			if(hand == Hand.MAIN_HAND && CardClientState.isTablePlaying() && CardClientState.isActive()){
+				if(world.isClient && world.getBlockState(hitResult.getBlockPos()).isOf(MiniGames.GAMBLING_TABLE)){
+					int selectedSlot = player.getInventory().selectedSlot;
+					if(CardClientState.isCardSlot(selectedSlot)){
+						int cardIndex = CardClientState.getCardIndexForSlot(selectedSlot, CardClientState.getCardCount());
+						dev.alphy90.minigames.game.TavernCard card = CardClientState.getCard(cardIndex);
+						if(card != null && actionCooldown == 0){
+							ClientPlayNetworking.send(new PlayTableCardPayLoad(hitResult.getBlockPos(), card.suit().ordinal(), card.value()));
+							CardClientState.removeCardAt(cardIndex);
+							player.swingHand(Hand.MAIN_HAND);
+							actionCooldown = 15;
+							return ActionResult.SUCCESS;
+						}
+					}
+				}
+			}
 			if (hand == Hand.MAIN_HAND && player.isSneaking()) {
 				ItemStack stack = player.getStackInHand(hand);
 				if (stack.isOf(MiniGames.TAVERN_CARD) || CardClientState.isActive()) {
@@ -153,6 +200,9 @@ public class MiniGamesClient implements ClientModInitializer {
 
 			if (!client.player.hasVehicle() && CardClientState.isTablePlaying()) {
 				CardClientState.setTablePlaying(false);
+				CardClientState.setActive(false);
+				CardClientState.setCardCount(0);
+				CardClientState.resetHold();
 			}
 
 			PlayerCardSyncState.tick(client);
@@ -191,6 +241,39 @@ public class MiniGamesClient implements ClientModInitializer {
 					if (!CardClientState.isActive() && CardClientState.getOriginSlot() >= 0
 							&& CardClientState.getOriginSlot() < 9) {
 						client.player.getInventory().selectedSlot = CardClientState.getOriginSlot();
+					}
+				}
+			}
+
+			if(CardClientState.isActive() && CardClientState.isTablePlaying() && CardClientState.getCardCount() > 0){
+				int selectedSlot = client.player.getInventory().selectedSlot;
+				boolean cardSelected = CardClientState.isCardSlot(selectedSlot);
+
+				if(client.options.useKey.isPressed() && cardSelected && actionCooldown == 0){
+					int cardIndex = CardClientState.getCardIndexForSlot(selectedSlot, CardClientState.getCardCount());
+					dev.alphy90.minigames.game.TavernCard card = CardClientState.getCard(cardIndex);
+					BlockPos tablePos = CardClientState.getCurrentTablePos();
+					if(tablePos == null && client.crosshairTarget instanceof BlockHitResult bhr && bhr.getType() == HitResult.Type.BLOCK){
+						if(client.world != null && client.world.getBlockState(bhr.getBlockPos()).isOf(MiniGames.GAMBLING_TABLE)){
+							tablePos = bhr.getBlockPos();
+							CardClientState.setCurrentTablePos(tablePos);
+						}
+					}
+					if(tablePos == null && client.player.getVehicle() != null){
+						BlockPos seatPos = client.player.getVehicle().getBlockPos();
+						for(Direction dir : Direction.Type.HORIZONTAL){
+							if(client.world.getBlockState(seatPos.offset(dir)).isOf(MiniGames.GAMBLING_TABLE)){
+								tablePos = seatPos.offset(dir);
+								CardClientState.setCurrentTablePos(tablePos);
+								break;
+							}
+						}
+					}
+					if(card != null && tablePos != null){
+						ClientPlayNetworking.send(new PlayTableCardPayLoad(tablePos, card.suit().ordinal(), card.value()));
+						CardClientState.removeCardAt(cardIndex);
+						client.player.swingHand(Hand.MAIN_HAND);
+						actionCooldown = 15;
 					}
 				}
 			}

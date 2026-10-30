@@ -174,6 +174,15 @@ public class CardClientState {
     //table playing
     private static boolean tablePlaying = false;
     private static boolean pendingRound = true;
+    private static net.minecraft.util.math.BlockPos currentTablePos = null;
+
+    public static net.minecraft.util.math.BlockPos getCurrentTablePos(){
+        return currentTablePos;
+    }
+
+    public static void setCurrentTablePos(net.minecraft.util.math.BlockPos pos){
+        currentTablePos = pos;
+    }
 
     public static boolean isTablePlaying(){
         return tablePlaying;
@@ -204,6 +213,70 @@ public class CardClientState {
                 resetHold();
             }
         }
+    }
+
+    //rounds
+    private static int totalRounds = 5;
+    private static int betAmount = 10;
+    private static int playerScore = 0;
+    private static int gamblerScore =0;
+    private static final java.util.List<Integer> roundResults = new java.util.ArrayList<>();
+
+    public static int getTotalRounds(){
+        return totalRounds;
+    }
+
+    public static int getBetAmount(){
+        return betAmount;
+    }
+
+    public static int getPlayerScore(){
+        return playerScore;
+    }
+
+    public static void setPlayerScore(int score){
+        playerScore = score;
+    }
+
+    public static int getGamblerScore(){
+        return gamblerScore;
+    }
+
+    public static void setGamblerScore(int score){
+        gamblerScore = score;
+    }
+
+    public static java.util.List<Integer> getRoundResults(){
+        return roundResults;
+    }
+
+    public static void addRoundResult(int result){
+        roundResults.add(result);
+    }
+
+    public static void resetMatch(int rounds, int bet){
+        totalRounds = Math.max(1, rounds);
+        betAmount = (Math.max(0, bet));
+        playerScore = 0;
+        gamblerScore = 0;
+        currentRound = 1;
+        roundResults.clear();
+    }
+    public static void addCard(TavernCard card){
+        if(card!=null){
+            handCards.add(card);
+            cardCount = handCards.size();
+        }
+    }
+
+    private static int currentRound = 1;
+
+    public static int getCurrentRound(){
+        return currentRound;
+    }
+
+    public static void setCurrentRound(int round){
+        currentRound = Math.max(1, round);
     }
 }
 
