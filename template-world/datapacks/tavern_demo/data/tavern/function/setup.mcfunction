@@ -5,6 +5,11 @@ time set noon
 difficulty easy
 setworldspawn -4 101 1
 
+kill @e[type=minigames:gambler]
+kill @e[type=minigames:seat]
+kill @e[x=-9,y=99,z=-6,dx=18,dy=8,dz=12,type=!player]
+tag @a remove tavern_setup
+
 fill -8 100 -5 8 105 5 spruce_planks outline
 fill -7 101 -4 7 104 4 air
 fill -7 100 -4 7 100 4 dark_oak_planks
