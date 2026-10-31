@@ -190,6 +190,43 @@ A dedicated Mini Games tab has been registered to the creative menu on Page 1 (s
 
 ---
 
+## Crafting Recipes
+
+All three core items can be crafted in survival mode and unlock in the Recipe Book upon collecting their ingredients.
+
+### Gambling Stool
+Shaped crafting recipe yielding 1 Gambling Stool:
+
+```
+[       ] [ Dark Oak Slab ] [       ]
+[       ] [     Stick     ] [       ]
+[ Stick ] [               ] [ Stick ]
+```
+
+Ingredients: 1 Dark Oak Slab and 3 Sticks.
+
+### Gambling Table
+Shaped crafting recipe yielding 1 Gambling Table:
+
+```
+[ Dark Oak Slab   ] [ Dark Oak Slab ] [ Dark Oak Slab   ]
+[ Dark Oak Planks ] [ Green Carpet  ] [ Dark Oak Planks ]
+[ Dark Oak Planks ] [               ] [ Dark Oak Planks ]
+```
+
+Ingredients: 3 Dark Oak Slabs, 4 Dark Oak Planks, and 1 Green Carpet.
+
+### Tavern Card
+Shapeless crafting recipe yielding 4 Tavern Cards:
+
+```
+[ Paper ] + [ Leather ] + [ Gold Nugget ]
+```
+
+Ingredients: 1 Paper, 1 Leather, and 1 Gold Nugget placed anywhere in the crafting grid.
+
+---
+
 ## Installation
 
 ### 1. Playing Within Minecraft (Standard Setup)
