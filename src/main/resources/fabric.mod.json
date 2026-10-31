@@ -3,13 +3,13 @@
 	"id": "mini-games",
 	"version": "${version}",
 	"name": "Mini Games",
-	"description": "This is an example description! Tell everyone what your mod is about!",
+	"description": "An authentic tavern card gambling minigame. Pull up a stool, wager emeralds on an interactive table against the Gambler NPC, and handle 3D cards that can be fanned, placed, or thrown.",
 	"authors": [
 		"Birinder"
 	],
 	"contact": {
-		"homepage": "https://fabricmc.net/",
-		"sources": "https://github.com/FabricMC/fabric-example-mod"
+		"homepage": "https://github.com/birinder-dev/Mini-Games",
+		"sources": "https://github.com/birinder-dev/Mini-Games"
 	},
 	"license": "CC0-1.0",
 	"icon": "assets/minigames/icon.png",
