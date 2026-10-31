@@ -8,27 +8,16 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/Minecraft-1.21.1-brightgreen.svg" alt="Minecraft 1.21.1" />
-  <img src="https://img.shields.io/badge/Fabric-Loader%200.16%2B-blue.svg" alt="Fabric Loader" />
+  <img src="https://img.shields.io/badge/Fabric-Loader%200.19.5%2B-blue.svg" alt="Fabric Loader" />
   <img src="https://img.shields.io/badge/Java-21-orange.svg" alt="Java 21" />
+  <br>
+  <a href="https://github.com/birinder-dev/Mini-Games/releases">
+    <img src="https://img.shields.io/badge/GitHub-Release%20v1.0.0-181717.svg?logo=github" alt="GitHub Release" />
+  </a>
+  <a href="https://www.curseforge.com/minecraft/mc-mods/fun-mini-games">
+    <img src="https://img.shields.io/badge/CurseForge-Available-F16436.svg?logo=curseforge&logoColor=white" alt="CurseForge" />
+  </a>
 </p>
-
----
-
-## Quick Start & Testing
-
-To test the mod immediately inside the prepared showcase room:
-
-```powershell
-git clone https://github.com/birinder-dev/Mini-Games.git
-cd Mini-Games
-.\gradlew runClient --args="--quickPlaySingleplayer DemoWorld"
-```
-
-If you are already in an existing world, execute `/function tavern:setup` to instantly construct the room, spawn the Gambler NPC, and populate the betting barrels.
-
-To test normally without presets in regular survival or creative worlds, place down a Gambling Table block, set two Gambling Stools adjacent to the table facing directly across from one another, spawn a Gambler nearby, and sit on the opposite stool with emeralds in hand.
-
-> **Performance Note**: Running the game through the development client (`runClient`) incurs heavy background debugging overhead that consumes extra system resources for lower visual performance. For actual survival playthroughs, using the compiled `.jar` file placed in your regular `.minecraft/mods` directory is strongly recommended.
 
 ---
 
@@ -48,7 +37,7 @@ Mini-Games introduces an authentic tavern card gambling experience into Minecraf
 
 ### Gambler & Furniture
 
-The Gambler is a custom librarian villager variant programmed with autonomous seating AI that actively searches for nearby stools. For a match to function, the player must sit on the stool directly opposite to the Gambler's stool, with both stools placed immediately adjacent to the Gambling Table block.
+The Gambler is a custom librarian villager variant programmed with autonomous seating AI that actively searches for nearby stools. For a match to function, the player must sit on the stool directly opposite to the Gambler's stool, with both stools placed immediately adjacent to the Gambling Table block. Once seated, right-clicking either the Gambling Table or the Gambler opens the wagering menu to initiate the game and launch the table HUD.
 
 <p align="center">
   <img src="art/area_render_1.png" alt="Gambler and Furniture Area Render" width="75%" />
@@ -189,3 +178,63 @@ A dedicated Mini Games tab has been registered to the creative menu on Page 1 (s
   <br>
   <em>The dedicated Mini Games creative tab positioned on Page 1.</em>
 </p>
+
+---
+
+## 🎮 Quick Controls
+
+| Action | Condition | Control | Description |
+| :--- | :--- | :--- | :--- |
+| **Sit on Stool** | Free / Standing | `Right-Click` on Stool | Mounts the stool facing the table. |
+| **Start Game & HUD** | Seated on stool opposite Gambler | `Right-Click` Table or Gambler | Opens wagering menu to configure match and start table HUD. |
+| **Play Table Card** | Active Table Game | `Right-Click` with Card in Hand | Plays your selected card onto the gambling table felt. |
+| **Enter / Exit Card State** | Not in table game | `Hold Shift + Right-Click` with Card | Fans out 3D cards in hand. Repeat to exit back to normal hotbar. |
+| **Place Card Flat** | Inside Card State | `Tap Right-Click` on Block Surface | Places the card flat against floors, walls, or tables. |
+| **Throw Card Projectile** | Inside Card State | `Hold Right-Click` (> 1 sec) | Charges throw power; release to flick the card as a 3D projectile. |
+
+---
+
+## 📦 Installation
+
+### 1. Playing Within Minecraft (Standard Setup)
+
+For normal survival or modpack playthroughs, download the compiled mod `.jar` from either release channel:
+
+* **GitHub Releases**: [Mini-Games Releases](https://github.com/birinder-dev/Mini-Games/releases)
+* **CurseForge**: [Fun Mini-Games on CurseForge](https://www.curseforge.com/minecraft/mc-mods/fun-mini-games)
+
+Requirements:
+* **Minecraft**: `1.21.1`
+* **Fabric Loader**: `0.19.5+`
+* **Fabric API**: Required
+
+Place `mini-games.jar` into your `.minecraft/mods` directory, launch the game, and you are ready to play.
+
+### 2. Testing Without Minecraft (Dev Environment)
+
+To test the mod directly from the source repository in the pre-built showcase room:
+
+```powershell
+git clone https://github.com/birinder-dev/Mini-Games.git
+cd Mini-Games
+.\gradlew runClient --args="--quickPlaySingleplayer DemoWorld"
+```
+
+If testing in an existing singleplayer world, run `/function tavern:setup` in chat to automatically generate the showcase tavern room.
+
+> **Performance Note**: Running through `runClient` incurs background development and debugging overhead that consumes more memory and CPU for lower visual framerates. For actual survival gameplay, the compiled `.jar` above is preferred.
+
+---
+
+## 📌 Supported Versions
+
+* **Minecraft**: `1.21.1`
+* **Mod Loader**: `Fabric Loader 0.19.5+`
+
+Currently, Mini-Games is built and maintained exclusively for **Minecraft 1.21.1 Fabric**. Support for other versions or alternative mod loaders will be announced here as development continues.
+
+---
+
+## 📜 License
+
+Developed for the Minecraft community. All custom textures, code, and models are open for extension.
