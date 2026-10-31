@@ -25,4 +25,5 @@ replay_*.log
 /*.jpg
 /*.jpeg
 .devcontainer/
+.vscode/
 
