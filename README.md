@@ -11,19 +11,15 @@
   <img src="https://img.shields.io/badge/Fabric-Loader%200.19.5%2B-blue.svg" alt="Fabric Loader" />
   <img src="https://img.shields.io/badge/Java-21-orange.svg" alt="Java 21" />
   <br>
-  <a href="https://github.com/birinder-dev/Mini-Games/releases">
-    <img src="https://img.shields.io/badge/GitHub-Release%20v1.0.0-181717.svg?logo=github" alt="GitHub Release" />
-  </a>
-  <a href="https://www.curseforge.com/minecraft/mc-mods/fun-mini-games">
-    <img src="https://img.shields.io/badge/CurseForge-Available-F16436.svg?logo=curseforge&logoColor=white" alt="CurseForge" />
-  </a>
+  <a href="https://github.com/birinder-dev/Mini-Games/releases"><img src="https://img.shields.io/badge/GitHub-Release%20v1.0.0-181717.svg?logo=github" alt="GitHub Release" /></a>
+  <a href="https://www.curseforge.com/minecraft/mc-mods/fun-mini-games"><img src="https://img.shields.io/badge/CurseForge-Available-F16436.svg?logo=curseforge&logoColor=white" alt="CurseForge" /></a>
 </p>
 
 ---
 
 ## Overview
 
-Mini-Games introduces an authentic tavern card gambling experience into Minecraft Fabric 1.21.1. Pull up a stool, wager emeralds on an interactive table against the Gambler NPC, and handle 3D cards that can be fanned in hand, placed flat onto surfaces, or flung across the room.
+Mini-Games introduces an authentic tavern card gambling experience into Minecraft Fabric 1.21.1. Pull up a stool, wager emeralds on an interactive table against the Gambler NPC, and handle 3D cards that can be fanned in hand, placed flat onto surfaces, or thrown across the room.
 
 <p align="center">
   <img src="art/player-with-gambler.png" alt="Player with Gambler at Table" width="85%" />
@@ -47,11 +43,11 @@ The Gambler is a custom librarian villager variant programmed with autonomous se
 
 ### Playing Mechanism & Table HUD
 
-The gambling minigame operates through three dedicated screen tabs: Rules, Advanced Configuration, and the Game Table itself.
+The gambling minigame operates through three dedicated screen tabs: Rules, Advanced Configuration, and the Game itself.
 
 #### 1. Rules
 
-Matches are contested through sequential card reveals against the Gambler. Each round, both participants place one card on the felt. Every suit carries an explicit win condition, with Sword cards taking absolute priority over Shield cards regardless of numeric value. When both cards are Swords, the higher number cuts down the opponent and takes the point.
+Matches are contested through sequential card reveals against the Gambler. Each round, both participants place one card on the table. Every suit carries an specific win condition, with Sword cards taking absolute priority over Shield cards regardless of numeric value. When both cards are Swords, the higher number cuts down the opponent and takes the point.
 
 <p align="center">
   <img src="art/rules-page1.png" alt="Rules Tab Page 1" width="85%" />
@@ -64,22 +60,22 @@ When both played cards are Shields, the rule inverts: the lowest numeric value p
 <p align="center">
   <img src="art/rules-page2.png" alt="Rules Tab Page 2" width="85%" />
   <br>
-  <em>Rules Page 2: Shield parry mechanics and tie-break rules.</em>
+  <em>Rules Page 2: Shield mechanics.</em>
 </p>
 
 #### 2. Advanced Settings
 
-The Advanced tab configures match parameters before wagering. Players can adjust the match length between 3, 5, 7, or 9 rounds, adjust the Gambler's AI difficulty between Easy, Medium, and Hard, and select the emerald wager. The emerald block texture on this slider was directly inspired by SevTech: Ages.
+The Advanced tab configures match parameters before wagering. Players can adjust the Gambler's AI difficulty between Easy, Medium, and Hard. The emerald block texture on this tab was directly inspired by SevTech Ages.
 
 <p align="center">
   <img src="art/advanced.png" alt="Advanced Settings Tab" width="85%" />
   <br>
-  <em>Advanced menu featuring the SevTech-inspired emerald wagering meter.</em>
+  <em>Advanced menu featuring the SevTech-inspired emerald texture in background.</em>
 </p>
 
 #### 3. Game Table
 
-The primary Game tab provides a full view of your current deck, the Gambler's remaining cards, and the confirmed wager amount before the first card is laid down.
+The primary Game tab provides a full view of your preferences before starting game, adjust the match length between 3, 5, 7, or 9 rounds, select the emerald wager, and view the confirmed wager amount before the first card is laid down.
 
 <p align="center">
   <img src="art/game-table.png" alt="Game Table Screen" width="85%" />
@@ -94,7 +90,7 @@ Once a match begins, an in-game HUD displays real-time round counts, your curren
 <p align="center">
   <img src="art/ingame-hud.png" alt="In-Game HUD and Table Deck" width="85%" />
   <br>
-  <em>Real-time match HUD tracking round progress and pot size.</em>
+  <em>Real-time match HUD tracking round progress.</em>
 </p>
 
 ---
@@ -114,10 +110,10 @@ While inside the card state, holding Right-Click charges up throw velocity befor
 <p align="center">
   <img src="art/card-thrown.png" alt="Card Thrown Projectile" width="75%" />
   <br>
-  <em>Charging and launching cards as projectile entities.</em>
+  <em>Thrown Card lying on ground.</em>
 </p>
 
-Tapping Right-Click directly onto any block face places the card flat against the surface as a decorative item on floors, walls, or tables.
+Tapping Right-Click directly onto any block face places the card flat against the surface as a decorative item.
 
 <p align="center">
   <img src="art/card-on-ground.png" alt="Cards Placed Flat on Ground" width="75%" />
@@ -181,20 +177,20 @@ A dedicated Mini Games tab has been registered to the creative menu on Page 1 (s
 
 ---
 
-## 🎮 Quick Controls
+## Quick Controls
 
 | Action | Condition | Control | Description |
 | :--- | :--- | :--- | :--- |
 | **Sit on Stool** | Free / Standing | `Right-Click` on Stool | Mounts the stool facing the table. |
 | **Start Game & HUD** | Seated on stool opposite Gambler | `Right-Click` Table or Gambler | Opens wagering menu to configure match and start table HUD. |
-| **Play Table Card** | Active Table Game | `Right-Click` with Card in Hand | Plays your selected card onto the gambling table felt. |
+| **Play Table Card** | Active Table Game | `Right-Click` with Card in Hand | Plays your selected card onto the gambling table. |
 | **Enter / Exit Card State** | Not in table game | `Hold Shift + Right-Click` with Card | Fans out 3D cards in hand. Repeat to exit back to normal hotbar. |
 | **Place Card Flat** | Inside Card State | `Tap Right-Click` on Block Surface | Places the card flat against floors, walls, or tables. |
 | **Throw Card Projectile** | Inside Card State | `Hold Right-Click` (> 1 sec) | Charges throw power; release to flick the card as a 3D projectile. |
 
 ---
 
-## 📦 Installation
+## Installation
 
 ### 1. Playing Within Minecraft (Standard Setup)
 
@@ -233,8 +229,3 @@ If testing in an existing singleplayer world, run `/function tavern:setup` in ch
 
 Currently, Mini-Games is built and maintained exclusively for **Minecraft 1.21.1 Fabric**. Support for other versions or alternative mod loaders will be announced here as development continues.
 
----
-
-## 📜 License
-
-Developed for the Minecraft community. All custom textures, code, and models are open for extension.
