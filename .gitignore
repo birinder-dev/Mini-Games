@@ -24,3 +24,5 @@ replay_*.log
 /*.png
 /*.jpg
 /*.jpeg
+.devcontainer/
+

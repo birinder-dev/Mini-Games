@@ -3,16 +3,13 @@
 </p>
 
 <p align="center">
-  <strong>Wager your emeralds, master 3D card physics, and test your luck against the Gambler.</strong>
+  <strong>Wager your emeralds, play with cards like never before, and test your luck against the Gambler.</strong>
 </p>
 
 <p align="center">
   <img src="https://img.shields.io/badge/Minecraft-1.21.1-brightgreen.svg" alt="Minecraft 1.21.1" />
   <img src="https://img.shields.io/badge/Fabric-Loader%200.16%2B-blue.svg" alt="Fabric Loader" />
   <img src="https://img.shields.io/badge/Java-21-orange.svg" alt="Java 21" />
-  <a href="https://codespaces.new/birinder-dev/Mini-Games">
-    <img src="https://github.com/codespaces/badge.svg" alt="Open in GitHub Codespaces" />
-  </a>
 </p>
 
 ---
@@ -76,16 +73,10 @@
 
 ## 🚀 How to Play & Test
 
-### Option A: Local Quick Play (Instant Test)
-Skip all menu screens and launch directly into the pre-built tavern chamber:
+Launch directly into the pre-built tavern showcase chamber with all features ready:
 ```powershell
 .\gradlew runClient --args="--quickPlaySingleplayer DemoWorld"
 ```
-
-### Option B: 1-Click Cloud Demo (GitHub Codespaces)
-Click the badge below to spin up a playable browser demo on GitHub's free cloud quota:
-
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/birinder-dev/Mini-Games)
 
 ---
 
@@ -100,3 +91,4 @@ Click the badge below to spin up a playable browser demo on GitHub's free cloud 
 
 ## 📜 License
 Developed for the Minecraft community. All custom textures, code, and models are open for extension.
+
