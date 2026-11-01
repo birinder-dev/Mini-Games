@@ -238,13 +238,32 @@ Place `mini-games.jar` into your `.minecraft/mods` directory, launch the game, a
 
 ### 2. Testing Without Minecraft (Dev Environment)
 
+Java 21 is required to run the development client. If you do not have Java 21 installed, you can install it quickly using your system's package manager:
+
+Windows:
+```powershell
+winget install Microsoft.OpenJDK.21
+```
+
+Linux (Ubuntu/Debian):
+```bash
+sudo apt install openjdk-21-jdk
+```
+
+macOS:
+```bash
+brew install openjdk@21
+```
+
 To test the mod directly from the source repository in the pre-built showcase room:
 
 ```powershell
 git clone https://github.com/birinder-dev/Mini-Games.git
 cd Mini-Games
-.\gradlew runClient --args="--quickPlaySingleplayer DemoWorld"
+./gradlew runClient --args="--quickPlaySingleplayer DemoWorld"
 ```
+
+> **First Run Note**: Don't worry if running the `./gradlew` command takes a few minutes (at least 3 to 4 minutes) on the first launch. Gradle is automatically downloading Minecraft assets, Fabric mappings, and dependencies in the background before booting the game window. Subsequent launches will start much faster.
 
 If testing in an existing singleplayer world, run `/function tavern:setup` in chat to automatically generate the showcase tavern room.
 
