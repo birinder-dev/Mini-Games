@@ -13,6 +13,7 @@
   <br>
   <a href="https://github.com/birinder-dev/Mini-Games/releases"><img src="https://img.shields.io/badge/GitHub-Release%20v1.0.0-181717.svg?logo=github" alt="GitHub Release" /></a>
   <a href="https://www.curseforge.com/minecraft/mc-mods/fun-mini-games"><img src="https://img.shields.io/badge/CurseForge-Available-F16436.svg?logo=curseforge&logoColor=white" alt="CurseForge" /></a>
+  <a href="#special-thanks"><img src="https://img.shields.io/badge/Built%20for-Hack%20Club%20Stardance-ec3750.svg" alt="Built for Hack Club" /></a>
 </p>
 
 ---
@@ -277,4 +278,21 @@ If testing in an existing singleplayer world, run `/function tavern:setup` in ch
 * **Mod Loader**: `Fabric Loader 0.19.5+`
 
 Currently, Mini-Games is built and maintained exclusively for **Minecraft 1.21.1 Fabric**. Support for other versions or alternative mod loaders will be announced here as development continues.
+
+---
+
+## Special Thanks
+
+<a id="special-thanks"></a>
+
+This mod was built and shipped as part of **[Hack Club's](https://hackclub.com/) Stardance**.
+
+[Hack Club](https://hackclub.com/) is a global, non-profit community run by and for high schoolers and teenagers. From global hackathons and maker spaces to hardware grants and You Ship We Ship events, Hack Club exists to empower young coders to build real open-source software and hardware—literally funding your teenage coding dreams. If you are a high schooler or teenager who loves building things, go check them out and join the community!
+
+<p align="left">
+  <a href="https://hackclub.com/">
+    <img src="https://assets.hackclub.com/flag-orpheus-top.svg" width="120" alt="Hack Club Flag" />
+  </a>
+</p>
+
 
