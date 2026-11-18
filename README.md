@@ -272,7 +272,7 @@ If testing in an existing singleplayer world, run `/function tavern:setup` in ch
 
 ---
 
-## 📌 Supported Versions
+## Supported Versions
 
 * **Minecraft**: `1.21.1`
 * **Mod Loader**: `Fabric Loader 0.19.5+`
@@ -287,7 +287,7 @@ Currently, Mini-Games is built and maintained exclusively for **Minecraft 1.21.1
 
 This mod was built and shipped as part of **[Hack Club's](https://hackclub.com/) Stardance**.
 
-[Hack Club](https://hackclub.com/) is a global, non-profit community run by and for high schoolers and teenagers. From global hackathons and maker spaces to hardware grants and You Ship We Ship events, Hack Club exists to empower young coders to build real open-source software and hardware—literally funding your teenage coding dreams. If you are a high schooler or teenager who loves building things, go check them out and join the community!
+[Hack Club](https://hackclub.com/) is a global, non-profit community run by and for high schoolers and teenagers aged 13-19. From global hackathons to hardware grants and YSWS(figure urself as its the best thing hackclub does). If you are a high schooler or teenager who loves building things, go check them out and join the community!
 
 <p align="left">
   <a href="https://hackclub.com/">
